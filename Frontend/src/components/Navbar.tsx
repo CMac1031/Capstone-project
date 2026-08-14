@@ -6,7 +6,7 @@ import Account from "./Account";
 
 
 function Logout(){
-    const { user, logout } = useAuth();
+    const { logout } = useAuth();
     /**
      * This sub-component will render the Logout button
      * As well as the Account component

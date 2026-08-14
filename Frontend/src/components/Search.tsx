@@ -1,7 +1,7 @@
-import {useAuth} from "../hooks/useAuth";
+//import {useAuth} from "../hooks/useAuth";
 
 export default function Search(){
-    const { isAuthenticated, user } = useAuth();
+    //const { isAuthenticated } = useAuth();
     //Disabled = not isAuthenticated
     return (
         <>

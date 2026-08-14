@@ -9,7 +9,7 @@
  * so the user doesn't have to retype it.
  */
 
-import React, { useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
+import React, { useRef, useState, type SubmitEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../hooks/useAuth";
 import { type Permission } from "../types/AuthTypes";
@@ -40,6 +40,8 @@ export default function Login() {
     setIsOpen(false);
     setError(null);
     setIsSubmitting(false);
+    setPassword("");
+    setEmail(""); //I could get rid of this
   };
 
   // Clicking the dimmed backdrop (not the modal card itself) closes the popup.
@@ -56,7 +58,7 @@ export default function Login() {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);

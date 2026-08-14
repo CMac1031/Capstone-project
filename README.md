@@ -3,12 +3,6 @@
 This is the frontend of the Northstar Customer Resource Management software. 
 
 
-## Design Notes
-I'm creating a hook to handle Login and account permissions through the application. Without logging in, search is disabled and prompts the User to log in.
-Once logged in, 
-
-
-
 ## Endpoints
 - Login: GET with Username and *HASHED* password. Returns 200 & jwt on success. 
 jwt is used with each subsequent request. API is responsible for handling user permissions.

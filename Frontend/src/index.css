@@ -1,7 +1,7 @@
 :root {
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
+  --bg: #D8DBE2;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -83,7 +83,7 @@ h1 {
   }
 }
 h2 {
-  font-size: 24px;
+
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
