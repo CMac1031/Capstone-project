@@ -1,75 +1,34 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Endpoints
+- Login: GET with Username and *HASHED* password. Returns 200 & jwt on success. 
+jwt is used with each subsequent request. API is responsible for handling user permissions.
 
-Currently, two official plugins are available:
+jwt is placed in a cookie -> maybe. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- List All Customer IDs: GET (Want to autofill suggestions under the search bar.)
+Suggestions come from frontend. If list is too large, we can do repeated calls to the API but that gets expensive. 
 
-## React Compiler
+- Profile: GET everything from a User Profile.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Edit Profile: POST. Admin user changes something about a profile, API checks validity. If it is valid, updates DB and responds to this. 
 
-## Expanding the ESLint configuration
+- In Flask (a WSGI python library), most CORS methods require an OPTIONS methods to check if an endpoint can handle a certain HTTP method. I'm not sure if that's standard across all backends or just that implementation. Might be good practice to. 
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### GET /api/login
+> Sends a username, and hashed password. Returns signed JWT and User permissions
+I need to be able to sign an account in, and have a trusted source return the permissions of the user. The signed JWT will be attached to every subsequent request.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### GET /api/customer/list
+> Pure GET request. Returns list of customer IDs. 
+For the search bar, I auto populate some suggestions based on the ID the user has typed. I'll manage the prefix tree, but this is the easiest way with under 1000 ids. 
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### GET /api/customer/{ID}
+> Sends a customer ID, returns the customer profile. Status, email, phone, etc.
+For the searched profile, I have so much space that I need to fill. Give me as much information as we have, and we can go from there. 
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### POST /api/customer/{ID}
+> Admin account posts changes to the profile. 
+Verify JWT permissions. Verify changes, then make the changes and post back to the DB. 
 
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+## TODO
+- New Favicon
