@@ -1,0 +1,52 @@
+/* App.css */
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: flex-end;
+
+}
+
+.app-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  /* background-color: #D8DBE2; */
+}
+
+/* Before a search: the search panel fills the width, so its centered
+   content (search-panel uses justify-content: center) sits mid-page. */
+.search-panel {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: width 0.4s ease;
+}
+
+/* After a search: search panel shrinks to the left half, pushing its
+   centered content into that half — visually "sliding" left. */
+.app-shell--split .search-panel {
+  width: 50%;
+}
+
+/* Profile panel starts collapsed and invisible, then expands into the
+   right half once a search has been performed. */
+.profile-panel {
+  width: 0%;
+  overflow: hidden;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  transition: width 0.4s ease, opacity 0.3s ease 0.1s;
+}
+
+.app-shell--split .profile-panel {
+  width: 50%;
+  opacity: 1;
+}
