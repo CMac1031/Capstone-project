@@ -30,3 +30,8 @@ export const GUEST_USER: User = {
   jwt: "",
 };
  
+export const TEST_ADMIN: User = {
+  email: "a@b.com",
+  permission: "ADMIN",
+  jwt: "abcd1234",
+};

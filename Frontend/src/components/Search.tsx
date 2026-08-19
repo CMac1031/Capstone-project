@@ -14,13 +14,13 @@
  *   immediately triggers onCustomerSelected.
  */
 
-import React, { useEffect, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAuth } from "../hooks/useAuth.tsx";
 import { isValidCustomerId } from "../types/Customer.ts";
-import "./SearchBar.css";
+import "../styles/Search.css";
 
 // Adjust to your real endpoint. Expected response: string[] of customer IDs.
-const CUSTOMER_IDS_ENDPOINT = "/api/customers/ids";
+const CUSTOMER_IDS_ENDPOINT = "/api/customers";
 const MAX_SUGGESTIONS = 3;
 
 interface SearchBarProps {

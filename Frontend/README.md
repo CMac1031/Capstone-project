@@ -32,3 +32,5 @@ Verify JWT permissions. Verify changes, then make the changes and post back to t
 
 ## TODO
 - New Favicon
+- Fix setState in useEffect hooks. Could cause unnecessary rerenders
+- Move from fetch to axios

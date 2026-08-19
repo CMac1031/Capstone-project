@@ -6,10 +6,11 @@
  * fields inline, with a single Save/Cancel pair for the whole form.
  */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth.tsx";
-import { type Customer, type AccountStatus, ACCOUNT_STATUSES } from "../types/Customer.ts";
-import "./Profile.css";
+import type Customer from "../types/Customer.ts";
+import { type AccountStatus, ACCOUNT_STATUSES } from "../types/Customer.ts";
+import "../styles/Profile.css";
 
 interface ProfileProps {
   customerId: string;
@@ -22,6 +23,14 @@ interface EditableFields {
   accountStatus: AccountStatus;
 }
 
+const MOCK_CUSTOMER: Customer = {
+  customerId: "CUS-1001",
+  name: "Amina Khan",
+  email: "amina.khan@pnc.com",
+  phone: "800-123-4567",
+  accountStatus: "ACTIVE",
+};
+
 function toEditableFields(customer: Customer): EditableFields {
   return {
     name: customer.name,
@@ -31,7 +40,7 @@ function toEditableFields(customer: Customer): EditableFields {
   };
 }
 
-export function Profile({ customerId }: ProfileProps) {
+export default function Profile({ customerId }: ProfileProps) {
   const { isAdmin, user } = useAuth();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -65,6 +74,7 @@ export function Profile({ customerId }: ProfileProps) {
         if (!cancelled) setCustomer(data);
       } catch (err) {
         if (!cancelled) {
+          //setCustomer(MOCK_CUSTOMER);
           setLoadError(
             err instanceof Error ? err.message : "Failed to load customer."
           );
@@ -137,6 +147,7 @@ export function Profile({ customerId }: ProfileProps) {
     return (
       <div className="profile-panel-inner profile-state profile-state--error">
         {loadError}
+        
       </div>
     );
   }

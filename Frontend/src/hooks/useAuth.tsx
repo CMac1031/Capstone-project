@@ -9,7 +9,7 @@
  *      user and permission, or to log in / out.
  */
 
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -17,7 +17,7 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { type User, type Permission, GUEST_USER } from "../types/AuthTypes";
+import { type User, type Permission, GUEST_USER, TEST_ADMIN } from "../types/AuthTypes";
 
 interface AuthContextValue {
   /** The current user. `user.permission` is null when nobody is logged in. */
@@ -42,7 +42,9 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  // const [user, setUser] = useState<User>(TEST_ADMIN);
   const [user, setUser] = useState<User>(GUEST_USER);
+  
 
   const login = useCallback(
     (email: string, permission: Permission, jwt: string) => {
