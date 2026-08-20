@@ -9,7 +9,7 @@
  * so the user doesn't have to retype it.
  */
 
-import React, { useRef, useState, type SubmitEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type SubmitEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../hooks/useAuth";
 import { type Permission } from "../types/AuthTypes";
