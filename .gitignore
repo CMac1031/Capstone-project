@@ -1,0 +1,23 @@
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# Build output
+target/
+dist/
+build/
+node_modules/
+
+# Local environment — never commit secrets
+.env
+.env.local
+*.local
+
+# OS noise
+.DS_Store
+Thumbs.db
