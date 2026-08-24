@@ -1,0 +1,30 @@
+# Maven build output
+target/
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# macOS files
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# Local Docker Compose configuration
+docker-compose*.yml
