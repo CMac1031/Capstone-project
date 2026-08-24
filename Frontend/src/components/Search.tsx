@@ -39,6 +39,7 @@ export default function Search({ onCustomerSelected }: SearchBarProps) {
   // authenticated. This avoids a request per keystroke.
   useEffect(() => {
     if (!isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllCustomerIds([]);
       return;
     }
@@ -71,6 +72,7 @@ export default function Search({ onCustomerSelected }: SearchBarProps) {
   // is fully reset by the time it re-disables.
   useEffect(() => {
     if (!isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue("");
       setSuggestions([]);
       setError(null);
