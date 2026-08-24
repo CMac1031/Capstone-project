@@ -291,6 +291,7 @@ export function AuthProvider({
  * Access the current auth state and mutators.
  * Must be called from a component rendered inside <AuthProvider>.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (context === undefined) {

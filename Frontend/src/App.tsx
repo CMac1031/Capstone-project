@@ -15,6 +15,7 @@ function App() {
   // Logging out closes the profile and resets the search layout.
   useEffect(() => {
     if (!isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCustomerId(null);
     }
   }, [isAuthenticated]);
