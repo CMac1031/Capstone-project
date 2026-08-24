@@ -10,6 +10,14 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}']
     },
   },
+  server:{
+    proxy:{
+      '/api':{
+        target:'http://localhost:8080',
+        changeOrigin: true,
+      }
+    }
+  }
 
   
 })

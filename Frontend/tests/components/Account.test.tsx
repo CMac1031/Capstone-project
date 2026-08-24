@@ -4,7 +4,7 @@ import Account from "../../src/components/Account";
 
 const { authState } = vi.hoisted(() => ({
 	authState: {
-		user: { email: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
+		user: { username: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
 	},
 }));
 
@@ -13,7 +13,7 @@ vi.mock("../../src/hooks/useAuth", () => ({
 }));
 
 beforeEach(() => {
-	authState.user = { email: "", permission: null, jwt: "" };
+	authState.user = { username: "", permission: null, jwt: "" };
 });
 
 afterEach(() => {
@@ -35,12 +35,12 @@ describe("Account", () => {
 		expect(screen.queryByRole("dialog", { name: "Account details" })).toBeNull();
 	});
 
-	it("shows the signed-in user's email and permission", () => {
-		authState.user = { email: "agent@example.com", permission: "AGENT", jwt: "jwt" };
+	it("shows the signed-in user's username and permission", () => {
+		authState.user = { username: "agent1", permission: "AGENT", jwt: "jwt" };
 		render(<Account />);
 
 		fireEvent.click(screen.getByAltText("account"));
-		expect(screen.getByText("agent@example.com")).toBeTruthy();
+		expect(screen.getByText("agent1")).toBeTruthy();
 		expect(screen.getByText("Permission:").parentElement?.textContent).toContain("AGENT");
 	});
 

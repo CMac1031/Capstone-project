@@ -6,7 +6,7 @@ import type Customer from "../../src/types/Customer";
 const { authState } = vi.hoisted(() => ({
 	authState: {
 		isAdmin: false,
-		user: { email: "agent@example.com", permission: "AGENT" as "ADMIN" | "AGENT", jwt: "token" },
+		user: { username: "agent1", permission: "AGENT" as "ADMIN" | "AGENT", jwt: "token" },
 	},
 }));
 
@@ -32,7 +32,7 @@ const updatedCustomer: Customer = {
 
 beforeEach(() => {
 	authState.isAdmin = false;
-	authState.user = { email: "agent@example.com", permission: "AGENT", jwt: "token" };
+	authState.user = { username: "agent1", permission: "AGENT", jwt: "token" };
 });
 
 afterEach(() => {

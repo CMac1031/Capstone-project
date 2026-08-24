@@ -77,7 +77,7 @@ describe("before anyone has logged in", () => {
   it("treats the visitor as a guest with no permission", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
-    expect(result.current.user).toEqual({ email: "", permission: null, jwt: "" });
+    expect(result.current.user).toEqual({ username: "", permission: null, jwt: "" });
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isAgent).toBe(false);
@@ -91,10 +91,10 @@ describe("logging in with a valid token", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     const jwt = createMockJwtExpiringIn(3600);
 
-    act(() => result.current.login("admin@example.com", "ADMIN", jwt));
+    act(() => result.current.login("admin1", "ADMIN", jwt));
 
     expect(result.current.user).toEqual({
-      email: "admin@example.com",
+      username: "admin1",
       permission: "ADMIN",
       jwt,
     });
@@ -107,7 +107,7 @@ describe("logging in with a valid token", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     const jwt = createMockJwtExpiringIn(3600);
 
-    act(() => result.current.login("agent@example.com", "AGENT", jwt));
+    act(() => result.current.login("agent1", "AGENT", jwt));
 
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.isAgent).toBe(true);
@@ -152,12 +152,12 @@ describe("logging out", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     const jwt = createMockJwtExpiringIn(3600);
 
-    act(() => result.current.login("admin@example.com", "ADMIN", jwt));
+    act(() => result.current.login("admin1", "ADMIN", jwt));
     expect(result.current.isAuthenticated).toBe(true);
 
     act(() => result.current.logout());
 
-    expect(result.current.user).toEqual({ email: "", permission: null, jwt: "" });
+    expect(result.current.user).toEqual({ username: "", permission: null, jwt: "" });
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.expiresAt).toBeNull();
     expect(result.current.isRefreshing).toBe(false);
@@ -199,15 +199,15 @@ describe("automatic logout when a session goes unused", () => {
     const soonToExpire = createMockJwtExpiringIn(2);
     const longerLived = createMockJwtExpiringIn(10);
 
-    act(() => result.current.login("first@example.com", "AGENT", soonToExpire));
-    act(() => result.current.login("second@example.com", "ADMIN", longerLived));
+    act(() => result.current.login("first", "AGENT", soonToExpire));
+    act(() => result.current.login("second", "ADMIN", longerLived));
 
     // Past the first token's expiry, but well within the second's.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
     expect(result.current.isAuthenticated).toBe(true);
-    expect(result.current.user.email).toBe("second@example.com");
+    expect(result.current.user.username).toBe("second");
 
     // Now past the second token's expiry too.
     await act(async () => {
@@ -396,7 +396,7 @@ describe("silently refreshing an active session", () => {
     const jwt = createMockJwtExpiringIn(5); // lives 5s; default lead time is 30s
 
     await act(async () => {
-      result.current.login("agent@example.com", "AGENT", jwt);
+      result.current.login("agent1", "AGENT", jwt);
       await vi.advanceTimersByTimeAsync(0); // flush the immediately-triggered refresh
     });
 
