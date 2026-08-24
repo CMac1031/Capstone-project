@@ -47,6 +47,7 @@ export default function Profile({ customerId }: ProfileProps) {
   // Fetch the customer whenever the selected ID changes.
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCustomer(null);
     setIsEditing(false);
     setDraft(null);
