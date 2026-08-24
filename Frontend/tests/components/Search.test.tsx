@@ -5,7 +5,7 @@ import Search from "../../src/components/Search";
 const { authState, selectedMock } = vi.hoisted(() => ({
 	authState: {
 		isAuthenticated: false,
-		user: { email: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
+		user: { username: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
 	},
 	selectedMock: vi.fn(),
 }));
@@ -16,7 +16,7 @@ vi.mock("../../src/hooks/useAuth.tsx", () => ({
 
 beforeEach(() => {
 	authState.isAuthenticated = false;
-	authState.user = { email: "", permission: null, jwt: "" };
+	authState.user = { username: "", permission: null, jwt: "" };
 	selectedMock.mockReset();
 });
 
@@ -39,7 +39,7 @@ describe("Search", () => {
 
 	it("fetches IDs with the token and shows sorted, limited suggestions", async () => {
 		authState.isAuthenticated = true;
-		authState.user = { email: "agent@example.com", permission: "AGENT", jwt: "token" };
+		authState.user = { username: "agent1", permission: "AGENT", jwt: "token" };
 		const ids = ["CUS-9999", "CUS-0003", "CUS-0001", "CUS-0002", "OTHER-1"];
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ids });
 		vi.stubGlobal("fetch", fetchMock);

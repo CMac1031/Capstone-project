@@ -70,11 +70,11 @@ interface AuthContextValue {
   isRefreshing: boolean;
   /**
    * Call after a successful login API call, passing the values returned
-   * by the server (email you already have, permission + jwt from the response).
+  * by the server (username you already have, permission + jwt from the response).
    * If the token is already expired (or has no readable `exp` claim), the
    * login is rejected and the user stays logged out.
    */
-  login: (email: string, permission: Permission, jwt: string) => void;
+  login: (username: string, permission: Permission, jwt: string) => void;
   /** Clears the session and returns the user to the guest / logged-out state. */
   logout: () => void;
 }
@@ -177,7 +177,7 @@ export function AuthProvider({
   // updates the session and re-arms the lifecycle timer around the new
   // expiry. On failure, logs out — a rejected refresh means the session
   // can't be trusted to continue.
-  async function performRefresh(expiryMs: number) {
+  async function performRefresh() {
     const { refreshEndpoint: endpoint } = configRef.current;
     const currentJwt = userRef.current.jwt;
 
@@ -232,7 +232,7 @@ export function AuthProvider({
       return;
     }
 
-    performRefresh(expiryMs);
+    performRefresh();
   }
 
   // Arms the check that runs shortly before the given expiry.
@@ -242,7 +242,7 @@ export function AuthProvider({
   }
 
   const login = useCallback(
-    (email: string, permission: Permission, jwt: string) => {
+    (username: string, permission: Permission, jwt: string) => {
       if (isJwtExpired(jwt)) {
         console.warn("Login rejected: JWT is missing, invalid, or expired.");
         logout();
@@ -250,7 +250,7 @@ export function AuthProvider({
       }
 
       const expiryMs = getJwtExpiryMs(jwt) as number;
-      setUser({ email, permission, jwt });
+      setUser({ username, permission, jwt });
       setExpiresAt(expiryMs);
       armSessionTimer(expiryMs);
     },

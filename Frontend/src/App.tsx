@@ -10,7 +10,7 @@ import "./App.css"
 
 function App() {
   const { isAuthenticated } = useAuth();
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
  
   // Logging out closes the profile and resets the search layout.
   useEffect(() => {

@@ -13,10 +13,10 @@ export type Permission = "ADMIN" | "AGENT" | null;
  
 /**
  * Represents the currently known user in the app.
- * When no one is logged in, `permission` is null and `email`/`jwt` are empty strings.
+ * When no one is logged in, `permission` is null and `username`/`jwt` are empty strings.
  */
 export interface User {
-  email: string;
+  username: string;
   permission: Permission;
   jwt: string;
 }
@@ -25,13 +25,13 @@ export interface User {
  * Default "guest" user — used before login or after logout.
  */
 export const GUEST_USER: User = {
-  email: "",
+  username: "",
   permission: null,
   jwt: "",
 };
  
 export const TEST_ADMIN: User = {
-  email: "a@b.com",
+  username: "admin1",
   permission: "ADMIN",
   jwt: "abcd1234",
 };

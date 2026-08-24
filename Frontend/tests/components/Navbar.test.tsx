@@ -4,7 +4,7 @@ import Navbar from "../../src/components/Navbar";
 
 const { authState, logoutMock } = vi.hoisted(() => ({
 	authState: {
-		user: { email: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
+		user: { username: "", permission: null as "ADMIN" | "AGENT" | null, jwt: "" },
 	},
 	logoutMock: vi.fn(),
 }));
@@ -22,7 +22,7 @@ vi.mock("../../src/components/Account", () => ({
 }));
 
 beforeEach(() => {
-	authState.user = { email: "", permission: null, jwt: "" };
+	authState.user = { username: "", permission: null, jwt: "" };
 	logoutMock.mockReset();
 });
 
@@ -41,7 +41,7 @@ describe("Navbar", () => {
 	});
 
 	it("renders Logout and Account for an authenticated user", () => {
-		authState.user = { email: "admin@example.com", permission: "ADMIN", jwt: "jwt" };
+		authState.user = { username: "admin1", permission: "ADMIN", jwt: "jwt" };
 		render(<Navbar />);
 
 		expect(screen.getByRole("button", { name: "Logout" })).toBeTruthy();

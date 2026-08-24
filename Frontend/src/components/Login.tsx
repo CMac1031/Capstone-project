@@ -2,10 +2,10 @@
  * LoginButton.tsx
  *
  * Renders a clickable box that opens a login popup. The popup collects
- * an email + password, sends them to the login API, and on success hands
+ * a username + password, sends them to the login API, and on success hands
  * the returned permission + jwt off to the useAuth() context.
  *
- * On failed login, the password field is cleared but the email is kept,
+ * On failed login, the password field is cleared but the username is kept,
  * so the user doesn't have to retype it.
  */
 
@@ -24,7 +24,7 @@ export default function Login() {
   const { login } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +41,7 @@ export default function Login() {
     setError(null);
     setIsSubmitting(false);
     setPassword("");
-    setEmail(""); //I could get rid of this
+    setUsername("");
   };
 
   // Clicking the dimmed backdrop (not the modal card itself) closes the popup.
@@ -64,23 +64,23 @@ export default function Login() {
     setError(null);
 
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!res.ok) {
-        throw new Error("Invalid email or password.");
+        throw new Error("Invalid username or password.");
       }
 
       const data: LoginApiResponse = await res.json();
-      login(email, data.permission, data.jwt);
+      login(username, data.permission, data.jwt);
 
       setPassword("");
       setIsOpen(false);
     } catch (err) {
-      // Failed login: clear password, keep email.
+      // Failed login: clear password, keep username.
       setPassword("");
       setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
@@ -120,12 +120,12 @@ export default function Login() {
 
                 <form className="login-form" onSubmit={handleSubmit}>
                   <label className="login-field">
-                    <span className="login-field-label">Email</span>
+                    <span className="login-field-label">Username</span>
                     <input
-                      type="email"
+                      type="text"
                       className="login-input"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       autoFocus
                       required
                     />
