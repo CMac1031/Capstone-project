@@ -177,7 +177,7 @@ export function AuthProvider({
   // updates the session and re-arms the lifecycle timer around the new
   // expiry. On failure, logs out — a rejected refresh means the session
   // can't be trusted to continue.
-  async function performRefresh(expiryMs: number) {
+  async function performRefresh() {
     const { refreshEndpoint: endpoint } = configRef.current;
     const currentJwt = userRef.current.jwt;
 
@@ -232,7 +232,7 @@ export function AuthProvider({
       return;
     }
 
-    performRefresh(expiryMs);
+    performRefresh();
   }
 
   // Arms the check that runs shortly before the given expiry.

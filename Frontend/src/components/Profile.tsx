@@ -23,14 +23,6 @@ interface EditableFields {
   accountStatus: AccountStatus;
 }
 
-const MOCK_CUSTOMER: Customer = {
-  customerId: "CUS-1001",
-  name: "Amina Khan",
-  email: "amina.khan@pnc.com",
-  phone: "800-123-4567",
-  accountStatus: "ACTIVE",
-};
-
 function toEditableFields(customer: Customer): EditableFields {
   return {
     name: customer.name,
