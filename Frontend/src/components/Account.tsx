@@ -8,7 +8,7 @@ export default function Account(){
      * @returns Account Component
      * This is the account Icon and subsequent overlay
      * It should display the account.svg icon
-     * When clicked, an overlay pops up showing the User's email
+    * When clicked, an overlay pops up showing the User's username
      * and the User's permission level. 
      * 
      * 
@@ -58,7 +58,7 @@ export default function Account(){
                     aria-label="Account details"
                     className="account-popover"
                 >
-                    <div className="account-row"><strong>Email:</strong> {user.email || "Not signed in"}</div>
+                    <div className="account-row"><strong>Username:</strong> {user.username || "Not signed in"}</div>
                     <div className="account-row"><strong>Permission:</strong> {permissionLabel}</div>
                 </div>
             )}

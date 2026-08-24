@@ -63,8 +63,8 @@ describe("Login", () => {
 		render(<Login />);
 		openLoginModal();
 
-		fireEvent.change(screen.getByLabelText("Email"), {
-			target: { value: "admin@example.com" },
+		fireEvent.change(screen.getByLabelText("Username"), {
+			target: { value: "admin1" },
 		});
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "secret" },
@@ -72,25 +72,25 @@ describe("Login", () => {
 		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
 
 		await waitFor(() => expect(loginMock).toHaveBeenCalledWith(
-			"admin@example.com",
+			"admin1",
 			"ADMIN",
 			jwt
 		));
-		expect(fetchMock).toHaveBeenCalledWith("/api/login", {
+		expect(fetchMock).toHaveBeenCalledWith("/api/auth/login", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ email: "admin@example.com", password: "secret" }),
+			body: JSON.stringify({ username: "admin1", password: "secret" }),
 		});
 		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 
-	it("shows the server error, clears the password, and keeps the email", async () => {
+	it("shows the server error, clears the password, and keeps the username", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
 		render(<Login />);
 		openLoginModal();
 
-		fireEvent.change(screen.getByLabelText("Email"), {
-			target: { value: "admin@example.com" },
+		fireEvent.change(screen.getByLabelText("Username"), {
+			target: { value: "admin1" },
 		});
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "wrong" },
@@ -98,10 +98,10 @@ describe("Login", () => {
 		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
 
 		await waitFor(() => expect(screen.getByText(
-			"Invalid email or password."
+			"Invalid username or password."
 		)).toBeTruthy());
-		expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe(
-			"admin@example.com"
+		expect((screen.getByLabelText("Username") as HTMLInputElement).value).toBe(
+			"admin1"
 		);
 		expect((screen.getByLabelText("Password") as HTMLInputElement).value).toBe("");
 		expect(screen.getByRole("dialog")).toBeTruthy();
@@ -135,7 +135,7 @@ describe("Login", () => {
 
 		resolveFetch({ ok: false, json: async () => ({}) });
 		await waitFor(() => expect(screen.getByText(
-			"Invalid email or password."
+			"Invalid username or password."
 		)).toBeTruthy());
 	});
 });
