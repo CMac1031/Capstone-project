@@ -3,7 +3,7 @@ package com.northstar.crm.service;
 import com.northstar.crm.api.dto.CreateInteractionRequest;
 import com.northstar.crm.api.dto.InteractionResponse;
 import com.northstar.crm.domain.Interaction;
-import com.northstar.crm.repo.CustomerFixtures;
+import com.northstar.crm.repo.CustomerRepository;
 import com.northstar.crm.repo.InteractionRepository;
 import java.time.Instant;
 import java.util.UUID;
@@ -11,38 +11,52 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// 이 파일은 우리 기능의 "두뇌"예요.
 @Service
 public class InteractionService {
 
     private static final String DEFAULT_CORRELATION_ID = "lab-request-001";
-
+    private final CustomerRepository customerRepository;
     private final InteractionRepository interactionRepository;
-    private final CustomerFixtures customerFixtures;
-
-    // 새로 추가됨: Spring 내부 쪽지(이벤트)를 던지는 도구.
-    // 이것도 Spring이 미리 만들어놓은 걸 주입받아서 씀 (KafkaTemplate처럼).
+    //private final CustomerFixtures customerFixtures;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public InteractionService(
             InteractionRepository interactionRepository,
-            CustomerFixtures customerFixtures,
+            CustomerRepository customerRepository,
+            //CustomerFixtures customerFixtures,
             ApplicationEventPublisher applicationEventPublisher) {
         this.interactionRepository = interactionRepository;
-        this.customerFixtures = customerFixtures;
+        //this.customerFixtures = customerFixtures;
+        this.customerRepository = customerRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    // @Transactional 추가됨: 이 메서드 전체를 "하나의 묶음"으로 관리하라는 표시.
+
+    //Transcational is a annotation that I put in. Wha this does is that make entire DB process as a one work.
+    //IF one of it fails then roll back everything.
     @Transactional
     public InteractionResponse create(CreateInteractionRequest request, String correlationHeader) {
+    //CreateInteractionRequest is a type that contains customerId,InteractionType, Summary, CorrelationId
+        //Then I named it "request"
+        //By the wat these inputs are called in InteractionController file where saying
+        //    InteractionResponse body = interactionService.create(request, correlationHeader);
 
+        //Now we get the correlationId by using helper function I made below.
+        //what this does is that first look for correlationID from the give header from https and if not then check the
+        //requested correlation id then if its empty or Null then it will use the default Correlation ID
         String correlationId = resolveCorrelationId(correlationHeader, request.correlationId());
 
-        if (!customerFixtures.exists(request.customerId())) {
+
+        //This part is checking if the given customer ID really exists or not however this part is still a
+        //fixture data. Once we do the group meeting, this part have to be changed
+//        if (!customerFixtures.exists(request.customerId())) {
+//            throw new CustomerNotFoundException(request.customerId());
+//        }
+
+        if (!customerRepository.existsById(request.customerId())) {
             throw new CustomerNotFoundException(request.customerId());
         }
-
+        // Now I create entity so i can save this into the db
         Interaction interaction = new Interaction(
                 UUID.randomUUID(),
                 request.customerId(),
@@ -50,12 +64,10 @@ public class InteractionService {
                 request.summary(),
                 correlationId,
                 Instant.now());
-
+        //By doing this I make new entitiy variable named saved and also update this new information into the db.
         Interaction saved = interactionRepository.save(interaction);
 
-        // 바뀐 부분: eventPublisher.publish(saved)를 직접 부르는 대신,
-        // "쪽지"만 던짐. 이건 즉시 실행 안 되고, 트랜잭션이 진짜 커밋된
-        // 다음에야 InteractionEventPublisher가 이 쪽지를 받아서 처리함.
+
         applicationEventPublisher.publishEvent(new InteractionCreatedEvent(saved));
 
         return toResponse(saved);

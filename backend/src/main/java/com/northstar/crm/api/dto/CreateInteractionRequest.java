@@ -12,7 +12,7 @@ public record CreateInteractionRequest(
         String customerId, //
 
         @NotBlank
-        @Pattern(regexp = "CALL|EMAIL|NOTE", message = "interactionType must be CALL, EMAIL, or NOTE")
+        @Pattern(regexp = "CALL|EMAIL|NOTE|MEETING", message = "interactionType must be CALL, EMAIL, NOTE, or MEETING")
         String interactionType,
 
         @NotBlank
