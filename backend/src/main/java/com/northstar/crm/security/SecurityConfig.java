@@ -10,6 +10,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import java.util.List;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
@@ -25,10 +29,32 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // Explicit allowlist of origins that may call this API. Never use "*" together
+    // with allowCredentials(true) -- browsers reject that combination anyway, and
+    // it's a common CORS misconfiguration this hardening step is meant to avoid.
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // For now this is saying we are allowing any request from the following address.
+        //GET, POST and etc these line tells that we only allows these kind of HTTP methods.
+        //Third line is telling that we are only allowing header that contains Authorization which is JWT token and
+        //Cotent type which tells it is a json header.
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config); //This line means that apply all of these config rules we made above
+        //Apply these rules to "/**" every API path.
+        return source;
+    }
+
     //register the following method's result into spring
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Without this, Spring Security's default behavior returns 403 for
