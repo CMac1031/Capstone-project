@@ -1,9 +1,9 @@
-UPDATE customer
+/*UPDATE customer
 SET name = 'Ravi Singh',
     email = 'ravi.singh@example.com'
 WHERE customer_id = 'CUS-1002';
 --fix data point in schema 
-
+*/
 -- Every interaction must belong to an existing customer.
 ALTER TABLE customer_interaction
     ADD CONSTRAINT fk_customer_interaction_customer
