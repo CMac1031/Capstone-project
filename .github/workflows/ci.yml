@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend
+  verify:
+    name: Verify backend
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -35,14 +35,11 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
-      - name: Test and package backend
+      - name: Clean verify
         run: mvn -B clean verify
 
-      - name: Build backend Docker image
-        run: docker build --tag northstar-crm-backend:ci .
-
   frontend:
-    name: Frontend
+    name: Verify frontend
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -61,14 +58,39 @@ jobs:
           cache: npm
           cache-dependency-path: Frontend/package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Lint frontend
+      - name: Lint
         run: npm run lint
 
-      - name: Test frontend
+      - name: Test
         run: npm run test -- --run
 
-      - name: Build frontend
+      - name: Build
         run: npm run build
+
+  image:
+    name: Build backend image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - verify
+      - frontend
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build SHA-tagged backend image
+        run: >
+          docker build
+          --file backend/Dockerfile
+          --tag crm-api:${GITHUB_SHA}
+          backend
+
+      - name: Record local image identity
+        run: |
+          echo "Image tag: crm-api:${GITHUB_SHA}"
+          docker image inspect "crm-api:${GITHUB_SHA}" --format='Image ID: {{.Id}}'
