@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+RUN npm run lint
+RUN npm run test -- --run
 RUN npm run build
 
 FROM ghcr.io/nginx/nginx-unprivileged:1.31.1-alpine3.23
