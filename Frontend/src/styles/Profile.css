@@ -29,6 +29,10 @@
   padding: 28px 32px 32px;
 }
 
+.profile-card + .profile-card {
+  margin-top: 20px;
+}
+
 .profile-state {
   color: var(--ns-text-secondary);
   font-size: 14px;
@@ -74,7 +78,7 @@
   color: var(--ns-accent);
 }
 
-/* ---- fields: two-column grid so the card isn't half-empty ---- */
+/* ---- fields: two-column grid ---- */
 
 .profile-fields {
   display: grid;
@@ -116,7 +120,7 @@
   border-color: var(--ns-accent);
 }
 
-/* ---- status badge (view mode) ---- */
+/* ---- status badge ---- */
 
 .profile-status-badge {
   display: inline-block;
@@ -150,7 +154,7 @@
 /* ---- edit actions ---- */
 
 .profile-error {
-  margin: 20px 0 0;
+  margin: 16px 0 0;
   font-size: 13px;
   color: var(--ns-status-suspended-text);
 }
@@ -203,4 +207,62 @@
 .profile-cancel-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ---- interaction logging card ---- */
+
+.profile-interaction-title {
+  font-family: var(--ns-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ns-text-primary);
+  margin: 0 0 4px;
+}
+
+.profile-interaction-subtitle {
+  font-size: 12px;
+  color: var(--ns-text-muted);
+  margin: 0 0 22px;
+}
+
+.profile-interaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-interaction-textarea {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: var(--ns-border);
+  border-radius: 8px;
+  background: var(--ns-surface);
+  color: var(--ns-text-primary);
+  font-family: var(--ns-font-body);
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-interaction-textarea:focus {
+  outline: none;
+  border-color: var(--ns-accent);
+}
+
+.profile-interaction-success {
+  background: var(--ns-status-active-bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.profile-interaction-success p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ns-status-active-text);
+}
+
+.profile-interaction-mono {
+  font-family: var(--ns-font-mono);
+  font-size: 11px;
+  margin-top: 4px !important;
 }
