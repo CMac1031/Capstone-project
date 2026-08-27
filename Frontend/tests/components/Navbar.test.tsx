@@ -35,7 +35,7 @@ describe("Navbar", () => {
 	it("renders the logo and Login for a guest user", () => {
 		render(<Navbar />);
 
-		expect(screen.getByRole("heading", { name: "NORTHSTAR CRM" })).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "Pretty Nice Code CRM" })).toBeTruthy();
 		expect(screen.getByTestId("login-component")).toBeTruthy();
 		expect(screen.queryByTestId("account-component")).toBeNull();
 	});

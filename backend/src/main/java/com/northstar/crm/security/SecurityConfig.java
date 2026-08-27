@@ -69,7 +69,9 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, accessDeniedException) ->
                                 response.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/actuator/health","/actuator/health/**").permitAll() // This part tells that everyone can access to it
+                        .requestMatchers("/api/auth/login", "/api/auth/signup", "/actuator/health","/actuator/health/**").permitAll() // This part tells that everyone can access to it
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/customers").hasRole("ADMIN")
                         .requestMatchers("/api/customers/**").hasAnyRole("AGENT", "ADMIN") // This tells that anyone who has the following role can access to it
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

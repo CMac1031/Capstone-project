@@ -1,153 +1,206 @@
-/* Profile.css */
+@import "./tokens.css";
 
-.profile-panel-inner {
-  width: 100%;
-  max-width: 480px;
-  padding: 24px;
+.profile-screen {
+  padding: 32px 40px;
+  max-width: 720px;
+  margin: 0 auto;
+  font-family: var(--ns-font-body);
+}
+
+.profile-back-link {
+  background: none;
+  border: none;
+  color: var(--ns-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 0 20px;
+  font-family: var(--ns-font-body);
+}
+
+.profile-back-link:hover {
+  color: var(--ns-accent);
+}
+
+.profile-card {
+  background: var(--ns-surface);
+  border: var(--ns-border);
+  border-radius: var(--ns-radius-lg);
+  box-shadow: var(--ns-shadow-card);
+  padding: 28px 32px 32px;
 }
 
 .profile-state {
-  font-size: 1rem;
-  color: #555;
+  color: var(--ns-text-secondary);
+  font-size: 14px;
 }
 
 .profile-state--error {
-  color: #c0392b;
+  color: var(--ns-status-suspended-text);
 }
+
+/* ---- header row ---- */
 
 .profile-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: var(--ns-border);
 }
 
 .profile-title {
-  margin: 0;
-  font-size: 1.4rem;
+  font-family: var(--ns-font-mono);
+  font-size: 20px;
   font-weight: 600;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+  color: var(--ns-text-primary);
+  margin: 0;
 }
 
 .profile-edit-button {
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  color: #373F51;
-  background: #fff;
-  border: 1px solid #373F51;
-  border-radius: 4px;
+  background: var(--ns-surface);
+  color: var(--ns-text-primary);
+  border: var(--ns-border);
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  font-family: var(--ns-font-body);
 }
 
+.profile-edit-button:hover {
+  border-color: var(--ns-accent);
+  color: var(--ns-accent);
+}
+
+/* ---- fields: two-column grid so the card isn't half-empty ---- */
+
 .profile-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
 }
 
 .profile-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .profile-field-label {
-  font-size: 0.8rem;
-  color: #777;
+  font-size: 12px;
   font-weight: 500;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+  color: var(--ns-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .profile-field-value {
-  font-size: 1rem;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+  font-size: 15px;
+  color: var(--ns-text-primary);
 }
 
 .profile-field-input {
-  padding: 10px 12px;
-  font-size: 1rem;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: var(--ns-border);
+  border-radius: 8px;
+  background: var(--ns-surface);
+  color: var(--ns-text-primary);
+  font-family: var(--ns-font-body);
 }
+
+.profile-field-input:focus {
+  outline: none;
+  border-color: var(--ns-accent);
+}
+
+/* ---- status badge (view mode) ---- */
 
 .profile-status-badge {
   display: inline-block;
   width: fit-content;
-  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  background: #eee;
 }
 
 .profile-status-badge--active {
-  background: #e2f6ea;
-  color: #1e824c;
+  background: var(--ns-status-active-bg);
+  color: var(--ns-status-active-text);
 }
 
 .profile-status-badge--inactive {
-  background: #eee;
-  color: #666;
-}
-
-.profile-status-badge--suspended {
-  background: #fdeaea;
-  color: #c0392b;
+  background: var(--ns-status-inactive-bg);
+  color: var(--ns-status-inactive-text);
 }
 
 .profile-status-badge--pending {
-  background: #fff6e0;
-  color: #a67c00;
+  background: var(--ns-status-pending-bg);
+  color: var(--ns-status-pending-text);
 }
 
+.profile-status-badge--suspended {
+  background: var(--ns-status-suspended-bg);
+  color: var(--ns-status-suspended-text);
+}
+
+/* ---- edit actions ---- */
+
 .profile-error {
-  color: #c0392b;
-  font-size: 0.875rem;
+  margin: 20px 0 0;
+  font-size: 13px;
+  color: var(--ns-status-suspended-text);
 }
 
 .profile-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: var(--ns-border);
 }
 
 .profile-save-button {
-  padding: 10px 20px;
-  font-weight: 600;
-  color: #D8DBE2;
-  background: #373F51;
+  background: var(--ns-accent);
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  font-family: var(--ns-font-body);
+}
+
+.profile-save-button:hover {
+  background: var(--ns-accent-hover);
 }
 
 .profile-save-button:disabled {
-  background: #a9c6ea;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .profile-cancel-button {
-  padding: 10px 20px;
-  font-weight: 600;
-  color: #555;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background: var(--ns-surface);
+  color: var(--ns-text-secondary);
+  border: var(--ns-border);
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  font-family: var(--ns-font-body);
+}
+
+.profile-cancel-button:hover {
+  border-color: var(--ns-text-muted);
+}
+
+.profile-cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

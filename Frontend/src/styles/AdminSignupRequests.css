@@ -1,0 +1,150 @@
+@import "./tokens.css";
+
+.admin-requests-screen {
+    padding: 32px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: var(--ns-font-body);
+}
+
+.admin-requests-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.admin-requests-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ns-text-muted);
+    margin: 0 0 4px;
+}
+
+.admin-requests-title {
+    font-family: var(--ns-font-display);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--ns-text-primary);
+}
+
+.admin-requests-count {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--ns-status-pending-bg);
+    color: var(--ns-status-pending-text);
+}
+
+.admin-requests-card {
+    background: var(--ns-surface);
+    border: var(--ns-border);
+    border-radius: var(--ns-radius-lg);
+    box-shadow: var(--ns-shadow-card);
+    overflow: hidden;
+}
+
+.admin-requests-state {
+    padding: 28px 24px;
+    font-size: 14px;
+    color: var(--ns-text-secondary);
+    margin: 0;
+}
+
+.admin-requests-state--error {
+    color: var(--ns-status-suspended-text);
+}
+
+.admin-requests-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-requests-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ns-text-muted);
+    padding: 12px 20px;
+    border-bottom: var(--ns-border);
+}
+
+.admin-requests-actions-head {
+    text-align: right;
+}
+
+.admin-requests-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-bottom: var(--ns-border);
+    vertical-align: middle;
+}
+
+.admin-requests-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-requests-mono {
+    font-family: var(--ns-font-mono);
+    font-size: 13px;
+}
+
+.admin-requests-role-select {
+    padding: 6px 8px;
+    font-size: 13px;
+    border: var(--ns-border);
+    border-radius: 6px;
+    background: var(--ns-surface);
+    color: var(--ns-text-primary);
+    font-family: var(--ns-font-body);
+}
+
+.admin-requests-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.admin-requests-approve {
+    background: var(--ns-status-active-text);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 6px;
+}
+
+.admin-requests-approve:disabled,
+.admin-requests-reject:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-requests-reject {
+    background: var(--ns-surface);
+    color: var(--ns-status-suspended-text);
+    border: 1px solid var(--ns-status-suspended-bg);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.admin-requests-error {
+    margin: 0;
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--ns-status-suspended-text);
+    border-top: var(--ns-border);
+}

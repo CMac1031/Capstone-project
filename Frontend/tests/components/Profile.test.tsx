@@ -51,13 +51,17 @@ function mockCustomerFetch(response: unknown = customer) {
 }
 
 describe("Profile", () => {
-	it("renders nothing and makes no request without a customer ID", () => {
+	it("renders only the back link and makes no request without a customer ID", () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
+		const onBack = vi.fn();
 
-		const { container } = render(<Profile customerId="" />);
+		render(<Profile customerId="" onBack={onBack} />);
 
-		expect(container.firstChild).toBeNull();
+		// The screen always renders its back link, regardless of customerId --
+		// only the card content underneath is conditional.
+		expect(screen.getByRole("button", { name: "← Back to customers" })).toBeTruthy();
+		expect(screen.queryByText("Loading customer...")).toBeNull();
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
@@ -67,7 +71,7 @@ describe("Profile", () => {
 			resolveFetch = resolve;
 		})));
 
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		expect(screen.getByText("Loading customer...")).toBeTruthy();
 
 		resolveFetch({ ok: true, json: async () => customer });
@@ -76,7 +80,7 @@ describe("Profile", () => {
 	it("loads a customer with the authorization token and hides editing for agents", async () => {
 		const fetchMock = mockCustomerFetch();
 
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByText("Amina Khan")).toBeTruthy());
 
 		expect(fetchMock).toHaveBeenCalledWith("/api/customers/CUS-1234", {
@@ -89,14 +93,14 @@ describe("Profile", () => {
 	it("shows an Error message when loading fails", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
 
-		render(<Profile customerId="CUS-404" />);
+		render(<Profile customerId="CUS-404" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByText("Customer not found.")).toBeTruthy());
 	});
 
 	it("uses the fallback message for a non-Error loading failure", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue("offline"));
 
-		render(<Profile customerId="CUS-404" />);
+		render(<Profile customerId="CUS-404" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByText("Failed to load customer.")).toBeTruthy());
 	});
 
@@ -106,7 +110,7 @@ describe("Profile", () => {
 			.mockResolvedValueOnce({ ok: true, json: async () => customer })
 			.mockResolvedValueOnce({ ok: true, json: async () => updatedCustomer });
 		vi.stubGlobal("fetch", fetchMock);
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeTruthy());
 
 		fireEvent.click(screen.getByRole("button", { name: "Edit" }));
@@ -139,7 +143,7 @@ describe("Profile", () => {
 		});
 		await waitFor(() => expect(screen.getByText("Updated Name")).toBeTruthy());
 		expect(screen.getByText("SUSPENDED")).toBeTruthy();
-});
+	});
 
 	it("shows Saving while a save is pending", async () => {
 		authState.isAdmin = true;
@@ -149,7 +153,7 @@ describe("Profile", () => {
 			.mockReturnValueOnce(new Promise((resolve) => { resolveSave = resolve; }));
 		vi.stubGlobal("fetch", fetchMock);
 
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeTruthy());
 		fireEvent.click(screen.getByRole("button", { name: "Edit" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -167,7 +171,7 @@ describe("Profile", () => {
 			.mockResolvedValueOnce({ ok: false });
 		vi.stubGlobal("fetch", fetchMock);
 
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeTruthy());
 		fireEvent.click(screen.getByRole("button", { name: "Edit" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -181,7 +185,7 @@ describe("Profile", () => {
 			.mockRejectedValueOnce("offline");
 		vi.stubGlobal("fetch", fetchMock);
 
-		render(<Profile customerId="CUS-1234" />);
+		render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeTruthy());
 		fireEvent.click(screen.getByRole("button", { name: "Edit" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -193,7 +197,7 @@ describe("Profile", () => {
 		vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise((resolve) => {
 			resolveFetch = resolve;
 		})));
-		const { unmount } = render(<Profile customerId="CUS-1234" />);
+		const { unmount } = render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		unmount();
 		resolveFetch({ ok: true, json: async () => customer });
 		await Promise.resolve();
@@ -204,7 +208,7 @@ describe("Profile", () => {
 		vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise((_, reject) => {
 			rejectFetch = reject;
 		})));
-		const { unmount } = render(<Profile customerId="CUS-1234" />);
+		const { unmount } = render(<Profile customerId="CUS-1234" onBack={vi.fn()} />);
 		unmount();
 		rejectFetch(new Error("late failure"));
 		await Promise.resolve();

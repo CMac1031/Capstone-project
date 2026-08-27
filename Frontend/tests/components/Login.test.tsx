@@ -11,10 +11,6 @@ vi.mock("../../src/hooks/useAuth", () => ({
 	useAuth: () => ({ login: loginMock }),
 }));
 
-function openLoginModal() {
-	fireEvent.click(screen.getByRole("button", { name: "Login" }));
-}
-
 beforeEach(() => {
 	loginMock.mockReset();
 });
@@ -25,43 +21,49 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
+// "Log in" appears twice on screen -- once as the tab, once as the submit
+// button -- so text assertions select the submit button specifically by
+// its class rather than by accessible name, which is ambiguous.
+function submitButton(container: HTMLElement): HTMLButtonElement {
+	return container.querySelector(".login-screen-submit") as HTMLButtonElement;
+}
+
+// Submitting via the form itself (rather than clicking the button)
+// bypasses jsdom's native "required" field validation, matching how the
+// old dialog-based tests worked -- these tests care about what happens
+// once handleSubmit actually runs, not about browser field validation.
+function submitForm(container: HTMLElement) {
+	fireEvent.submit(container.querySelector("form")!);
+}
+
 describe("Login", () => {
-	it("opens from a click and closes when the dimmed backdrop is clicked", () => {
-		render(<Login />);
+	it("renders the login form by default, with the Log in tab active", () => {
+		const { container } = render(<Login />);
 
-		openLoginModal();
-		expect(screen.getByRole("dialog")).toBeTruthy();
-
-		fireEvent.mouseDown(screen.getByRole("dialog"));
-		expect(screen.getByRole("dialog")).toBeTruthy();
-
-		fireEvent.mouseDown(document.querySelector(".login-overlay")!);
+		expect(screen.getByLabelText("Username")).toBeTruthy();
+		expect(screen.getByLabelText("Password")).toBeTruthy();
+		expect(submitButton(container).textContent).toBe("Log in");
 	});
 
-	it("opens from Enter and Space on the login button", () => {
-		render(<Login />);
-		const loginButton = screen.getByRole("button", { name: "Login" });
+	it("switches to the Create account tab and back", () => {
+		const { container } = render(<Login />);
 
-		fireEvent.keyDown(loginButton, { key: "Escape" });
-		expect(screen.queryByRole("dialog")).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+		expect(submitButton(container).textContent).toBe("Request account");
 
-		fireEvent.keyDown(loginButton, { key: "Enter" });
-		expect(screen.getByRole("dialog")).toBeTruthy();
-
-		fireEvent.mouseDown(document.querySelector(".login-overlay")!);
-		fireEvent.keyDown(loginButton, { key: " " });
-		expect(screen.getByRole("dialog")).toBeTruthy();
+		const tabs = container.querySelectorAll(".login-screen-tab");
+		fireEvent.click(tabs[0]); // the "Log in" tab
+		expect(submitButton(container).textContent).toBe("Log in");
 	});
 
-	it("submits credentials, passes the response to auth, and closes", async () => {
+	it("submits credentials, and passes the response to auth", async () => {
 		const jwt = createMockJwtExpiringIn(3600);
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
 			json: async () => ({ permission: "ADMIN", jwt }),
 		});
 		vi.stubGlobal("fetch", fetchMock);
-		render(<Login />);
-		openLoginModal();
+		const { container } = render(<Login />);
 
 		fireEvent.change(screen.getByLabelText("Username"), {
 			target: { value: "admin1" },
@@ -69,7 +71,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "secret" },
 		});
-		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
+		submitForm(container);
 
 		await waitFor(() => expect(loginMock).toHaveBeenCalledWith(
 			"admin1",
@@ -81,13 +83,11 @@ describe("Login", () => {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ username: "admin1", password: "secret" }),
 		});
-		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 
 	it("shows the server error, clears the password, and keeps the username", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
-		render(<Login />);
-		openLoginModal();
+		const { container } = render(<Login />);
 
 		fireEvent.change(screen.getByLabelText("Username"), {
 			target: { value: "admin1" },
@@ -95,7 +95,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "wrong" },
 		});
-		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
+		submitForm(container);
 
 		await waitFor(() => expect(screen.getByText(
 			"Invalid username or password."
@@ -104,15 +104,13 @@ describe("Login", () => {
 			"admin1"
 		);
 		expect((screen.getByLabelText("Password") as HTMLInputElement).value).toBe("");
-		expect(screen.getByRole("dialog")).toBeTruthy();
 	});
 
 	it("uses the fallback message when fetch rejects with a non-Error", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue("offline"));
-		render(<Login />);
-		openLoginModal();
+		const { container } = render(<Login />);
 
-		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
+		submitForm(container);
 
 		await waitFor(() => expect(screen.getByText(
 			"Login failed. Please try again."
@@ -127,10 +125,9 @@ describe("Login", () => {
 			}
 		);
 		vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
-		render(<Login />);
-		openLoginModal();
+		const { container } = render(<Login />);
 
-		fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
+		submitForm(container);
 		expect((screen.getByRole("button", { name: "Logging in..." }) as HTMLButtonElement).disabled).toBe(true);
 
 		resolveFetch({ ok: false, json: async () => ({}) });
