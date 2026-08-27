@@ -1,16 +1,17 @@
 /**
  * Profile.tsx
  *
- * Displays a customer's profile (name, account status, email, phone).
- * Fetches the customer whenever `customerId` changes. Admins can edit all
- * fields inline, with a single Save/Cancel pair for the whole form.
+ * Displays a customer's profile (name, account status, email, phone),
+ * plus a form to record a new interaction (call/email/note/meeting).
+ * Fetches the customer whenever `customerId` changes. Admins can edit
+ * profile fields inline, with a single Save/Cancel pair for the whole form.
  *
  * onBack returns to the customer list -- this screen no longer lives
  * inside the old Search+Profile split layout, so it needs its own way
  * back.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "../hooks/useAuth.tsx";
 import type Customer from "../types/Customer.ts";
 import { type AccountStatus, ACCOUNT_STATUSES } from "../types/Customer.ts";
@@ -28,6 +29,9 @@ interface EditableFields {
   accountStatus: AccountStatus;
 }
 
+type InteractionType = "CALL" | "EMAIL" | "NOTE" | "MEETING";
+const INTERACTION_TYPES: InteractionType[] = ["CALL", "EMAIL", "NOTE", "MEETING"];
+
 function toEditableFields(customer: Customer): EditableFields {
   return {
     name: customer.name,
@@ -37,19 +41,12 @@ function toEditableFields(customer: Customer): EditableFields {
   };
 }
 
-// Pulls a readable message out of the backend's error JSON.
-// Handles two shapes we might get back:
-//  - ApiExceptionHandler's ProblemDetail: { detail: "..." }
-//  - Spring's default Bean Validation failure: { errors: [{ defaultMessage: "..." }] }
 async function extractErrorMessage(res: Response, fallback: string): Promise<string> {
   try {
     const body = await res.json();
     if (typeof body?.detail === "string") return body.detail;
-    if (Array.isArray(body?.errors) && body.errors[0]?.defaultMessage) {
-      return body.errors[0].defaultMessage;
-    }
   } catch {
-    // response wasn't JSON -- fall through to the generic message
+    // not JSON -- fall through
   }
   return fallback;
 }
@@ -66,6 +63,17 @@ export default function Profile({ customerId, onBack }: ProfileProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  // --- interaction logging state ---
+  const [interactionType, setInteractionType] = useState<InteractionType>("NOTE");
+  const [summary, setSummary] = useState("");
+  const [isLoggingInteraction, setIsLoggingInteraction] = useState(false);
+  const [interactionError, setInteractionError] = useState<string | null>(null);
+  const [lastInteraction, setLastInteraction] = useState<{
+    id: string;
+    correlationId: string;
+    interactionType: string;
+  } | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -74,6 +82,8 @@ export default function Profile({ customerId, onBack }: ProfileProps) {
     setDraft(null);
     setSaveError(null);
     setLoadError(null);
+    setLastInteraction(null);
+    setInteractionError(null);
 
     if (!customerId) return;
 
@@ -149,6 +159,49 @@ export default function Profile({ customerId, onBack }: ProfileProps) {
     }
   };
 
+  // Records an interaction -- this is what actually triggers the backend's
+  // Kafka publish (AFTER the DB save commits; see ADR-003). The frontend
+  // doesn't talk to Kafka directly, it just calls this REST endpoint.
+  const submitInteraction = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!customer) return;
+    setIsLoggingInteraction(true);
+    setInteractionError(null);
+    setLastInteraction(null);
+
+    try {
+      const res = await fetch("/api/v1/interactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.jwt}`,
+        },
+        body: JSON.stringify({
+          customerId: customer.customerId,
+          interactionType,
+          summary,
+        }),
+      });
+
+      if (!res.ok) {
+        const message = await extractErrorMessage(res, "Couldn't log the interaction.");
+        throw new Error(message);
+      }
+
+      const created = await res.json();
+      setLastInteraction({
+        id: created.id,
+        correlationId: created.correlationId,
+        interactionType: created.interactionType,
+      });
+      setSummary("");
+    } catch (err) {
+      setInteractionError(err instanceof Error ? err.message : "Couldn't log the interaction.");
+    } finally {
+      setIsLoggingInteraction(false);
+    }
+  };
+
   return (
       <div className="profile-screen">
         <button type="button" className="profile-back-link" onClick={onBack}>
@@ -160,73 +213,126 @@ export default function Profile({ customerId, onBack }: ProfileProps) {
         {loadError && <div className="profile-card profile-state profile-state--error">{loadError}</div>}
 
         {!isLoading && !loadError && customer && (
-            <div className="profile-card">
-              <div className="profile-header">
-                <h2 className="profile-title">{customer.customerId}</h2>
-                {isAdmin && !isEditing && (
-                    <button type="button" className="profile-edit-button" onClick={startEditing}>
-                      Edit
-                    </button>
+            <>
+              <div className="profile-card">
+                <div className="profile-header">
+                  <h2 className="profile-title">{customer.customerId}</h2>
+                  {isAdmin && !isEditing && (
+                      <button type="button" className="profile-edit-button" onClick={startEditing}>
+                        Edit
+                      </button>
+                  )}
+                </div>
+
+                <div className="profile-fields">
+                  <ProfileField
+                      label="Name"
+                      value={isEditing && draft ? draft.name : customer.name}
+                      isEditing={isEditing}
+                      onChange={(v) => updateDraftField("name", v)}
+                  />
+                  <ProfileField
+                      label="Email"
+                      value={isEditing && draft ? draft.email : customer.email}
+                      isEditing={isEditing}
+                      type="email"
+                      onChange={(v) => updateDraftField("email", v)}
+                  />
+                  <ProfileField
+                      label="Phone"
+                      value={isEditing && draft ? draft.phone : customer.phone}
+                      isEditing={isEditing}
+                      type="tel"
+                      onChange={(v) => updateDraftField("phone", v)}
+                  />
+
+                  <div className="profile-field">
+                    <span className="profile-field-label">Account Status</span>
+                    {isEditing && draft ? (
+                        <select
+                            className="profile-field-input"
+                            value={draft.accountStatus}
+                            onChange={(e) => updateDraftField("accountStatus", e.target.value)}
+                        >
+                          {ACCOUNT_STATUSES.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                          ))}
+                        </select>
+                    ) : (
+                        <span className={`profile-status-badge profile-status-badge--${customer.accountStatus.toLowerCase()}`}>
+                    {customer.accountStatus}
+                  </span>
+                    )}
+                  </div>
+                </div>
+
+                {saveError && <p className="profile-error">{saveError}</p>}
+
+                {isEditing && (
+                    <div className="profile-actions">
+                      <button type="button" className="profile-save-button" onClick={saveEditing} disabled={isSaving}>
+                        {isSaving ? "Saving..." : "Save"}
+                      </button>
+                      <button type="button" className="profile-cancel-button" onClick={cancelEditing} disabled={isSaving}>
+                        Cancel
+                      </button>
+                    </div>
                 )}
               </div>
 
-              <div className="profile-fields">
-                <ProfileField
-                    label="Name"
-                    value={isEditing && draft ? draft.name : customer.name}
-                    isEditing={isEditing}
-                    onChange={(v) => updateDraftField("name", v)}
-                />
-                <ProfileField
-                    label="Email"
-                    value={isEditing && draft ? draft.email : customer.email}
-                    isEditing={isEditing}
-                    type="email"
-                    onChange={(v) => updateDraftField("email", v)}
-                />
-                <ProfileField
-                    label="Phone"
-                    value={isEditing && draft ? draft.phone : customer.phone}
-                    isEditing={isEditing}
-                    type="tel"
-                    onChange={(v) => updateDraftField("phone", v)}
-                />
+              <div className="profile-card profile-interaction-card">
+                <h3 className="profile-interaction-title">Log an interaction</h3>
+                <p className="profile-interaction-subtitle">
+                  Saved to PostgreSQL first, then published to Kafka once the save commits.
+                </p>
 
-                <div className="profile-field">
-                  <span className="profile-field-label">Account Status</span>
-                  {isEditing && draft ? (
-                      <select
-                          className="profile-field-input"
-                          value={draft.accountStatus}
-                          onChange={(e) => updateDraftField("accountStatus", e.target.value)}
-                      >
-                        {ACCOUNT_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                        ))}
-                      </select>
-                  ) : (
-                      <span className={`profile-status-badge profile-status-badge--${customer.accountStatus.toLowerCase()}`}>
-                  {customer.accountStatus}
-                </span>
+                <form onSubmit={submitInteraction} className="profile-interaction-form">
+                  <label className="profile-field">
+                    <span className="profile-field-label">Type</span>
+                    <select
+                        className="profile-field-input"
+                        value={interactionType}
+                        onChange={(e) => setInteractionType(e.target.value as InteractionType)}
+                    >
+                      {INTERACTION_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="profile-field">
+                    <span className="profile-field-label">Summary</span>
+                    <textarea
+                        className="profile-interaction-textarea"
+                        value={summary}
+                        onChange={(e) => setSummary(e.target.value)}
+                        required
+                        maxLength={2000}
+                        rows={3}
+                    />
+                  </label>
+
+                  {interactionError && <p className="profile-error">{interactionError}</p>}
+
+                  {lastInteraction && (
+                      <div className="profile-interaction-success">
+                        <p>
+                          Logged <strong>{lastInteraction.interactionType}</strong> and published to Kafka.
+                        </p>
+                        <p className="profile-interaction-mono">correlationId: {lastInteraction.correlationId}</p>
+                      </div>
                   )}
-                </div>
+
+                  <button type="submit" className="profile-save-button" disabled={isLoggingInteraction}>
+                    {isLoggingInteraction ? "Logging..." : "Log interaction"}
+                  </button>
+                </form>
               </div>
-
-              {saveError && <p className="profile-error">{saveError}</p>}
-
-              {isEditing && (
-                  <div className="profile-actions">
-                    <button type="button" className="profile-save-button" onClick={saveEditing} disabled={isSaving}>
-                      {isSaving ? "Saving..." : "Save"}
-                    </button>
-                    <button type="button" className="profile-cancel-button" onClick={cancelEditing} disabled={isSaving}>
-                      Cancel
-                    </button>
-                  </div>
-              )}
-            </div>
+            </>
         )}
       </div>
   );
