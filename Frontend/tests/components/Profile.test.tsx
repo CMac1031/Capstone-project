@@ -124,7 +124,13 @@ describe("Profile", () => {
 		fireEvent.change(editInputs[0], { target: { value: updatedCustomer.name } });
 		fireEvent.change(editInputs[1], { target: { value: updatedCustomer.email } });
 		fireEvent.change(editInputs[2], { target: { value: updatedCustomer.phone } });
-		fireEvent.change(screen.getByRole("combobox"), { target: { value: "SUSPENDED" } });
+
+		// The interaction-logging form (added alongside profile editing) also
+		// renders a <select>, so there are now two comboboxes on screen --
+		// the account status one is the first, since it's rendered above the
+		// interaction form.
+		const [accountStatusSelect] = screen.getAllByRole("combobox");
+		fireEvent.change(accountStatusSelect, { target: { value: "SUSPENDED" } });
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
 		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
