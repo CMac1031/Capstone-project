@@ -21,26 +21,31 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// Login is now a full-page screen (no button-triggered modal), so every
-// test just renders it directly and interacts with the form that's
-// already on screen.
+// "Log in" appears twice on screen -- once as the tab, once as the submit
+// button -- so tests select the submit button specifically by its class
+// rather than by accessible name, which is ambiguous.
+function submitButton(container: HTMLElement): HTMLButtonElement {
+	return container.querySelector(".login-screen-submit") as HTMLButtonElement;
+}
+
 describe("Login", () => {
 	it("renders the login form by default, with the Log in tab active", () => {
-		render(<Login />);
+		const { container } = render(<Login />);
 
 		expect(screen.getByLabelText("Username")).toBeTruthy();
 		expect(screen.getByLabelText("Password")).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Log in" })).toBeTruthy();
+		expect(submitButton(container).textContent).toBe("Log in");
 	});
 
 	it("switches to the Create account tab and back", () => {
-		render(<Login />);
+		const { container } = render(<Login />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Create account" }));
-		expect(screen.getByRole("button", { name: "Request account" })).toBeTruthy();
+		expect(submitButton(container).textContent).toBe("Request account");
 
-		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
-		expect(screen.getByRole("button", { name: "Log in" })).toBeTruthy();
+		const tabs = container.querySelectorAll(".login-screen-tab");
+		fireEvent.click(tabs[0]); // the "Log in" tab
+		expect(submitButton(container).textContent).toBe("Log in");
 	});
 
 	it("submits credentials, and passes the response to auth", async () => {
@@ -50,7 +55,7 @@ describe("Login", () => {
 			json: async () => ({ permission: "ADMIN", jwt }),
 		});
 		vi.stubGlobal("fetch", fetchMock);
-		render(<Login />);
+		const { container } = render(<Login />);
 
 		fireEvent.change(screen.getByLabelText("Username"), {
 			target: { value: "admin1" },
@@ -58,7 +63,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "secret" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+		fireEvent.click(submitButton(container));
 
 		await waitFor(() => expect(loginMock).toHaveBeenCalledWith(
 			"admin1",
@@ -74,7 +79,7 @@ describe("Login", () => {
 
 	it("shows the server error, clears the password, and keeps the username", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
-		render(<Login />);
+		const { container } = render(<Login />);
 
 		fireEvent.change(screen.getByLabelText("Username"), {
 			target: { value: "admin1" },
@@ -82,7 +87,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "wrong" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+		fireEvent.click(submitButton(container));
 
 		await waitFor(() => expect(screen.getByText(
 			"Invalid username or password."
@@ -95,9 +100,9 @@ describe("Login", () => {
 
 	it("uses the fallback message when fetch rejects with a non-Error", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue("offline"));
-		render(<Login />);
+		const { container } = render(<Login />);
 
-		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+		fireEvent.click(submitButton(container));
 
 		await waitFor(() => expect(screen.getByText(
 			"Login failed. Please try again."
@@ -112,9 +117,9 @@ describe("Login", () => {
 			}
 		);
 		vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
-		render(<Login />);
+		const { container } = render(<Login />);
 
-		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+		fireEvent.click(submitButton(container));
 		expect((screen.getByRole("button", { name: "Logging in..." }) as HTMLButtonElement).disabled).toBe(true);
 
 		resolveFetch({ ok: false, json: async () => ({}) });
