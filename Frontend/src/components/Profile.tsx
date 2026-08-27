@@ -6,10 +6,11 @@
  * fields inline, with a single Save/Cancel pair for the whole form.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useAuth } from "../hooks/useAuth.tsx";
 import type Customer from "../types/Customer.ts";
 import { type AccountStatus, ACCOUNT_STATUSES } from "../types/Customer.ts";
+import { newCorrelationId } from "../utils/correlation";
 import "../styles/Profile.css";
 
 interface ProfileProps {
@@ -34,6 +35,7 @@ function toEditableFields(customer: Customer): EditableFields {
 
 export default function Profile({ customerId }: ProfileProps) {
   const { isAdmin, user } = useAuth();
+  const statusFieldId = useId();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,16 +62,18 @@ export default function Profile({ customerId }: ProfileProps) {
       setIsLoading(true);
       try {
         const res = await fetch(`/api/customers/${customerId}`, {
-          headers: { Authorization: `Bearer ${user.jwt}` },
+          headers: {
+            Authorization: `Bearer ${user.jwt}`,
+            "X-Correlation-Id": newCorrelationId(),
+          },
         });
         if (!res.ok) throw new Error("Customer not found.");
         const data: Customer = await res.json();
         if (!cancelled) setCustomer(data);
       } catch (err) {
         if (!cancelled) {
-          //setCustomer(MOCK_CUSTOMER);
           setLoadError(
-            err instanceof Error ? err.message : "Failed to load customer."
+              err instanceof Error ? err.message : "Failed to load customer."
           );
         }
       } finally {
@@ -111,6 +115,7 @@ export default function Profile({ customerId }: ProfileProps) {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.jwt}`,
+          "X-Correlation-Id": newCorrelationId(),
         },
         body: JSON.stringify(draft),
       });
@@ -121,7 +126,7 @@ export default function Profile({ customerId }: ProfileProps) {
       setDraft(null);
     } catch (err) {
       setSaveError(
-        err instanceof Error ? err.message : "Failed to save changes."
+          err instanceof Error ? err.message : "Failed to save changes."
       );
     } finally {
       setIsSaving(false);
@@ -129,19 +134,29 @@ export default function Profile({ customerId }: ProfileProps) {
   };
 
   if (isLoading) {
+    // role="status" + aria-live: a screen reader announces this without the
+    // user having to go looking for it.
     return (
-      <div className="profile-panel-inner profile-state">
-        Loading customer...
-      </div>
+        <div
+            className="profile-panel-inner profile-state"
+            role="status"
+            aria-live="polite"
+        >
+          Loading customer...
+        </div>
     );
   }
 
   if (loadError) {
+    // role="alert" is assertive - a failed lookup interrupts, because the user
+    // is otherwise left staring at an empty panel wondering what happened.
     return (
-      <div className="profile-panel-inner profile-state profile-state--error">
-        {loadError}
-        
-      </div>
+        <div
+            className="profile-panel-inner profile-state profile-state--error"
+            role="alert"
+        >
+          {loadError}
+        </div>
     );
   }
 
@@ -150,91 +165,106 @@ export default function Profile({ customerId }: ProfileProps) {
   }
 
   return (
-    <div className="profile-panel-inner">
-      <div className="profile-header">
-        <h2 className="profile-title">{customer.customerId}</h2>
-        {isAdmin && !isEditing && (
-          <button
-            type="button"
-            className="profile-edit-button"
-            onClick={startEditing}
-          >
-            Edit
-          </button>
-        )}
-      </div>
-
-      <div className="profile-fields">
-        <ProfileField
-          label="Name"
-          value={isEditing && draft ? draft.name : customer.name}
-          isEditing={isEditing}
-          onChange={(v) => updateDraftField("name", v)}
-        />
-        <ProfileField
-          label="Email"
-          value={isEditing && draft ? draft.email : customer.email}
-          isEditing={isEditing}
-          type="email"
-          onChange={(v) => updateDraftField("email", v)}
-        />
-        <ProfileField
-          label="Phone"
-          value={isEditing && draft ? draft.phone : customer.phone}
-          isEditing={isEditing}
-          type="tel"
-          onChange={(v) => updateDraftField("phone", v)}
-        />
-
-        <div className="profile-field">
-          <span className="profile-field-label">Account Status</span>
-          {isEditing && draft ? (
-            <select
-              className="profile-field-input"
-              value={draft.accountStatus}
-              onChange={(e) =>
-                updateDraftField("accountStatus", e.target.value)
-              }
-            >
-              {ACCOUNT_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span
-              className={`profile-status-badge profile-status-badge--${customer.accountStatus.toLowerCase()}`}
-            >
-              {customer.accountStatus}
-            </span>
+      <section
+          className="profile-panel-inner"
+          aria-label={`Customer profile for ${customer.customerId}`}
+          aria-busy={isSaving}
+      >
+        <div className="profile-header">
+          <h2 className="profile-title">{customer.customerId}</h2>
+          {isAdmin && !isEditing && (
+              <button
+                  type="button"
+                  className="profile-edit-button"
+                  onClick={startEditing}
+              >
+                Edit
+              </button>
           )}
         </div>
-      </div>
 
-      {saveError && <p className="profile-error">{saveError}</p>}
+        <div className="profile-fields">
+          <ProfileField
+              label="Name"
+              value={isEditing && draft ? draft.name : customer.name}
+              isEditing={isEditing}
+              onChange={(v) => updateDraftField("name", v)}
+          />
+          <ProfileField
+              label="Email"
+              value={isEditing && draft ? draft.email : customer.email}
+              isEditing={isEditing}
+              type="email"
+              onChange={(v) => updateDraftField("email", v)}
+          />
+          <ProfileField
+              label="Phone"
+              value={isEditing && draft ? draft.phone : customer.phone}
+              isEditing={isEditing}
+              type="tel"
+              onChange={(v) => updateDraftField("phone", v)}
+          />
 
-      {isEditing && (
-        <div className="profile-actions">
-          <button
-            type="button"
-            className="profile-save-button"
-            onClick={saveEditing}
-            disabled={isSaving}
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </button>
-          <button
-            type="button"
-            className="profile-cancel-button"
-            onClick={cancelEditing}
-            disabled={isSaving}
-          >
-            Cancel
-          </button>
+          <div className="profile-field">
+            <label className="profile-field-label" htmlFor={statusFieldId}>
+              Account Status
+            </label>
+            {isEditing && draft ? (
+                <select
+                    id={statusFieldId}
+                    className="profile-field-input"
+                    value={draft.accountStatus}
+                    onChange={(e) =>
+                        updateDraftField("accountStatus", e.target.value)
+                    }
+                >
+                  {ACCOUNT_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                  ))}
+                </select>
+            ) : (
+                // The badge carries meaning in colour AND text. Colour alone would
+                // exclude anyone who cannot distinguish it, and would not survive a
+                // screenshot in a support ticket.
+                <span
+                    id={statusFieldId}
+                    className={`profile-status-badge profile-status-badge--${customer.accountStatus.toLowerCase()}`}
+                >
+              {customer.accountStatus}
+            </span>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+
+        {saveError && (
+            <p className="profile-error" role="alert">
+              {saveError}
+            </p>
+        )}
+
+        {isEditing && (
+            <div className="profile-actions">
+              <button
+                  type="button"
+                  className="profile-save-button"
+                  onClick={saveEditing}
+                  disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </button>
+              <button
+                  type="button"
+                  className="profile-cancel-button"
+                  onClick={cancelEditing}
+                  disabled={isSaving}
+              >
+                Cancel
+              </button>
+            </div>
+        )}
+      </section>
   );
 }
 
@@ -247,25 +277,34 @@ interface ProfileFieldProps {
 }
 
 function ProfileField({
-  label,
-  value,
-  isEditing,
-  type = "text",
-  onChange,
-}: ProfileFieldProps) {
+                        label,
+                        value,
+                        isEditing,
+                        type = "text",
+                        onChange,
+                      }: ProfileFieldProps) {
+  // useId gives a stable, collision-free id per rendered field, so the label
+  // and its input are genuinely associated rather than just visually adjacent.
+  const fieldId = useId();
+
   return (
-    <div className="profile-field">
-      <span className="profile-field-label">{label}</span>
-      {isEditing ? (
-        <input
-          type={type}
-          className="profile-field-input"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <span className="profile-field-value">{value}</span>
-      )}
-    </div>
+      <div className="profile-field">
+        <label className="profile-field-label" htmlFor={fieldId}>
+          {label}
+        </label>
+        {isEditing ? (
+            <input
+                id={fieldId}
+                type={type}
+                className="profile-field-input"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        ) : (
+            <span id={fieldId} className="profile-field-value">
+          {value}
+        </span>
+        )}
+      </div>
   );
 }

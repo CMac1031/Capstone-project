@@ -45,8 +45,13 @@ describe("Search", () => {
 		vi.stubGlobal("fetch", fetchMock);
 		render(<Search onCustomerSelected={selectedMock} />);
 
+		// The correlation id is a fresh UUID per request, so we assert that one
+		// was sent rather than pinning a value that changes every run.
 		await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/customers", {
-			headers: { Authorization: "Bearer token" },
+			headers: {
+				Authorization: "Bearer token",
+				"X-Correlation-Id": expect.any(String),
+			},
 		}));
 		fireEvent.change(screen.getByLabelText("Customer ID search"), { target: { value: " cus-0 " } });
 

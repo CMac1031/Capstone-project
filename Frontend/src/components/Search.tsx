@@ -17,6 +17,7 @@
 import { useEffect, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAuth } from "../hooks/useAuth.tsx";
 import { isValidCustomerId } from "../types/Customer.ts";
+import { newCorrelationId } from "../utils/correlation";
 import "../styles/Search.css";
 
 // Adjust to your real endpoint. Expected response: string[] of customer IDs.
@@ -49,7 +50,10 @@ export default function Search({ onCustomerSelected }: SearchBarProps) {
     async function fetchCustomerIds() {
       try {
         const res = await fetch(CUSTOMER_IDS_ENDPOINT, {
-          headers: { Authorization: `Bearer ${user.jwt}` },
+          headers: {
+            Authorization: `Bearer ${user.jwt}`,
+            "X-Correlation-Id": newCorrelationId(),
+          },
         });
         if (!res.ok) throw new Error("Failed to load customer IDs.");
         const ids: string[] = await res.json();
@@ -84,9 +88,9 @@ export default function Search({ onCustomerSelected }: SearchBarProps) {
     if (!trimmed) return [];
 
     return allCustomerIds
-      .filter((id) => id.toUpperCase().includes(trimmed))
-      .sort()
-      .slice(0, MAX_SUGGESTIONS);
+        .filter((id) => id.toUpperCase().includes(trimmed))
+        .sort()
+        .slice(0, MAX_SUGGESTIONS);
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -118,45 +122,45 @@ export default function Search({ onCustomerSelected }: SearchBarProps) {
   };
 
   return (
-    <div className="search-bar">
-      <div className="search-input-row">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search customer ID (CUS-1234)"
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          disabled={!isAuthenticated}
-          aria-label="Customer ID search"
-        />
-        <button
-          type="button"
-          className="search-button"
-          onClick={() => runSearch(value)}
-          disabled={!isAuthenticated}
-        >
-          Search
-        </button>
+      <div className="search-bar">
+        <div className="search-input-row">
+          <input
+              type="text"
+              className="search-input"
+              placeholder="Search customer ID (CUS-1234)"
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              disabled={!isAuthenticated}
+              aria-label="Customer ID search"
+          />
+          <button
+              type="button"
+              className="search-button"
+              onClick={() => runSearch(value)}
+              disabled={!isAuthenticated}
+          >
+            Search
+          </button>
+        </div>
+
+        {error && <p className="search-error">{error}</p>}
+
+        {suggestions.length > 0 && (
+            <ul className="search-suggestions">
+              {suggestions.map((id) => (
+                  <li key={id}>
+                    <button
+                        type="button"
+                        className="search-suggestion-item"
+                        onClick={() => runSearch(id)}
+                    >
+                      {id}
+                    </button>
+                  </li>
+              ))}
+            </ul>
+        )}
       </div>
-
-      {error && <p className="search-error">{error}</p>}
-
-      {suggestions.length > 0 && (
-        <ul className="search-suggestions">
-          {suggestions.map((id) => (
-            <li key={id}>
-              <button
-                type="button"
-                className="search-suggestion-item"
-                onClick={() => runSearch(id)}
-              >
-                {id}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }

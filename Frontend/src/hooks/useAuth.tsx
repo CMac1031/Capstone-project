@@ -33,6 +33,7 @@ import {
 } from "react";
 import { type User, type Permission, GUEST_USER } from "../types/AuthTypes";
 import { getJwtExpiryMs, isJwtExpired } from "../utils/jwtUtils";
+import { newCorrelationId } from "../utils/correlation";
 
 // setTimeout delays are capped at a 32-bit signed int (~24.8 days). Any
 // wait longer than this has to be broken into multiple scheduled checks.
@@ -70,7 +71,7 @@ interface AuthContextValue {
   isRefreshing: boolean;
   /**
    * Call after a successful login API call, passing the values returned
-  * by the server (username you already have, permission + jwt from the response).
+   * by the server (username you already have, permission + jwt from the response).
    * If the token is already expired (or has no readable `exp` claim), the
    * login is rejected and the user stays logged out.
    */
@@ -92,11 +93,11 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({
-  children,
-  refreshLeadMs = DEFAULT_REFRESH_LEAD_MS,
-  activityWindowMs = DEFAULT_ACTIVITY_WINDOW_MS,
-  refreshEndpoint = DEFAULT_REFRESH_ENDPOINT,
-}: AuthProviderProps) {
+                               children,
+                               refreshLeadMs = DEFAULT_REFRESH_LEAD_MS,
+                               activityWindowMs = DEFAULT_ACTIVITY_WINDOW_MS,
+                               refreshEndpoint = DEFAULT_REFRESH_ENDPOINT,
+                             }: AuthProviderProps) {
   const [user, setUser] = useState<User>(GUEST_USER);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -129,12 +130,12 @@ export function AuthProvider({
     };
 
     ACTIVITY_EVENTS.forEach((eventName) =>
-      window.addEventListener(eventName, markActive, { passive: true })
+        window.addEventListener(eventName, markActive, { passive: true })
     );
 
     return () => {
       ACTIVITY_EVENTS.forEach((eventName) =>
-        window.removeEventListener(eventName, markActive)
+          window.removeEventListener(eventName, markActive)
       );
     };
   }, [isAuthenticated]);
@@ -185,7 +186,10 @@ export function AuthProvider({
     try {
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { Authorization: `Bearer ${currentJwt}` },
+        headers: {
+          Authorization: `Bearer ${currentJwt}`,
+          "X-Correlation-Id": newCorrelationId(),
+        },
       });
       if (!res.ok) throw new Error("Refresh request failed.");
 
@@ -224,7 +228,7 @@ export function AuthProvider({
 
     const { activityWindowMs: activityWindow } = configRef.current;
     const isRecentlyActive =
-      Date.now() - lastActivityRef.current <= activityWindow;
+        Date.now() - lastActivityRef.current <= activityWindow;
 
     if (!isRecentlyActive) {
       // Nobody's using the session — let it expire rather than renew it.
@@ -242,22 +246,22 @@ export function AuthProvider({
   }
 
   const login = useCallback(
-    (username: string, permission: Permission, jwt: string) => {
-      if (isJwtExpired(jwt)) {
-        console.warn("Login rejected: JWT is missing, invalid, or expired.");
-        logout();
-        return;
-      }
+      (username: string, permission: Permission, jwt: string) => {
+        if (isJwtExpired(jwt)) {
+          console.warn("Login rejected: JWT is missing, invalid, or expired.");
+          logout();
+          return;
+        }
 
-      const expiryMs = getJwtExpiryMs(jwt) as number;
-      setUser({ username, permission, jwt });
-      setExpiresAt(expiryMs);
-      armSessionTimer(expiryMs);
-    },
-    // armSessionTimer/scheduleAt/etc. are stable in behavior (they read
-    // live values via refs) even though they're re-created each render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [logout]
+        const expiryMs = getJwtExpiryMs(jwt) as number;
+        setUser({ username, permission, jwt });
+        setExpiresAt(expiryMs);
+        armSessionTimer(expiryMs);
+      },
+      // armSessionTimer/scheduleAt/etc. are stable in behavior (they read
+      // live values via refs) even though they're re-created each render.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [logout]
   );
 
   // Clean up any pending timer if the provider unmounts.
@@ -271,17 +275,17 @@ export function AuthProvider({
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      isAuthenticated,
-      isAdmin: user.permission === "ADMIN",
-      isAgent: user.permission === "AGENT",
-      expiresAt,
-      isRefreshing,
-      login,
-      logout,
-    }),
-    [user, isAuthenticated, expiresAt, isRefreshing, login, logout]
+      () => ({
+        user,
+        isAuthenticated,
+        isAdmin: user.permission === "ADMIN",
+        isAgent: user.permission === "AGENT",
+        expiresAt,
+        isRefreshing,
+        login,
+        logout,
+      }),
+      [user, isAuthenticated, expiresAt, isRefreshing, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

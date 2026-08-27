@@ -79,8 +79,13 @@ describe("Profile", () => {
 		render(<Profile customerId="CUS-1234" />);
 		await waitFor(() => expect(screen.getByText("Amina Khan")).toBeTruthy());
 
+		// The correlation id is a fresh UUID per request, so we assert that one
+		// was sent rather than pinning a value that changes every run.
 		expect(fetchMock).toHaveBeenCalledWith("/api/customers/CUS-1234", {
-			headers: { Authorization: "Bearer token" },
+			headers: {
+				Authorization: "Bearer token",
+				"X-Correlation-Id": expect.any(String),
+			},
 		});
 		expect(screen.getByText("ACTIVE")).toBeTruthy();
 		expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
@@ -129,6 +134,7 @@ describe("Profile", () => {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: "Bearer token",
+				"X-Correlation-Id": expect.any(String),
 			},
 			body: JSON.stringify({
 				name: updatedCustomer.name,
@@ -139,7 +145,7 @@ describe("Profile", () => {
 		});
 		await waitFor(() => expect(screen.getByText("Updated Name")).toBeTruthy());
 		expect(screen.getByText("SUSPENDED")).toBeTruthy();
-});
+	});
 
 	it("shows Saving while a save is pending", async () => {
 		authState.isAdmin = true;

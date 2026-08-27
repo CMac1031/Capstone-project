@@ -3,7 +3,15 @@
 .profile-panel-inner {
   width: 100%;
   max-width: 480px;
-  padding: 24px;
+  padding: 28px;
+
+  /* White card on the tinted page background, so it reads as a raised
+     surface rather than blending into it. */
+  background: #ffffff;
+  border: 1px solid #E8DFDB;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(239, 99, 81, 0.08),
+  0 6px 18px rgba(33, 31, 32, 0.07);
 }
 
 .profile-state {
@@ -20,6 +28,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F2EBE9;
 }
 
 .profile-title {
@@ -38,11 +48,25 @@
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-  color: #373F51;
+  color: #211F20;
   background: #fff;
-  border: 1px solid #373F51;
-  border-radius: 4px;
+  border: 1px solid #211F20;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profile-edit-button:hover {
+  background: #211F20;
+  color: #fff;
+}
+
+.profile-edit-button:focus-visible,
+.profile-save-button:focus-visible,
+.profile-cancel-button:focus-visible,
+.profile-field-input:focus-visible {
+  outline: 2px solid #EF6351;
+  outline-offset: 2px;
 }
 
 .profile-fields {
@@ -59,8 +83,9 @@
 
 .profile-field-label {
   font-size: 0.8rem;
-  color: #777;
+  color: #8A817D;
   font-weight: 500;
+  letter-spacing: 0.02em;
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -68,6 +93,7 @@
 
 .profile-field-value {
   font-size: 1rem;
+  color: #211F20;
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -79,8 +105,9 @@
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #E0D5D1;
+  border-radius: 6px;
 }
 
 .profile-status-badge {
@@ -130,24 +157,34 @@
 .profile-save-button {
   padding: 10px 20px;
   font-weight: 600;
-  color: #D8DBE2;
-  background: #373F51;
+  color: #fff;
+  background: #EF6351;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.profile-save-button:hover:not(:disabled) {
+  background: #D9503F;
 }
 
 .profile-save-button:disabled {
-  background: #a9c6ea;
+  background: #DCD4D1;
+  color: #918A87;
   cursor: not-allowed;
 }
 
 .profile-cancel-button {
   padding: 10px 20px;
   font-weight: 600;
-  color: #555;
+  color: #5F5854;
   background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid #E0D5D1;
+  border-radius: 6px;
   cursor: pointer;
+}
+
+.profile-cancel-button:hover {
+  background: #F7F3F1;
 }

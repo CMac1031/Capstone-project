@@ -9,50 +9,56 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 8px 18px;
   cursor: pointer;
   user-select: none;
   background: #EF6351;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: none;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.login-button-box:hover {
+  background: #D9503F;
 }
 
 .login-button-box:focus-visible {
-  outline: 2px solid #4a90e2;
-  outline-offset: 2px;
+  outline: 2px solid #EF6351;
+  outline-offset: 3px;
 }
 
 .login-button-label {
+  /* Explicit, because the navbar sets a light grey text colour that would
+     otherwise be inherited and wash out against the coral. */
+  color: #fff;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-variation-settings:
-    "wdth" 100;
+          "wdth" 100;
 }
 
 /* --- Overlay / backdrop behind the popup --- */
 .login-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(33, 31, 32, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-/* --- The popup itself: large, per the spec --- */
+/* --- The popup itself --- */
 .login-modal {
   background: #fff;
-  border-radius: 8px;
-  padding: 40px;
-  width: 480px;
+  border-radius: 12px;
+  padding: 36px;
+  width: 420px;
   max-width: 90vw;
-  min-height: 360px;
-  background: #A9BCD0;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 50px rgba(33, 31, 32, 0.30);
   display: flex;
   flex-direction: column;
 }
@@ -61,47 +67,52 @@
   margin: 0 0 24px 0;
   font-size: 1.5rem;
   font-weight: 600;
+  color: #211F20;
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-variation-settings:
-    "wdth" 100;
+          "wdth" 100;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  flex: 1;
+  gap: 18px;
 }
 
 .login-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .login-field-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  color: #8A817D;
+  letter-spacing: 0.02em;
   font-family: "Roboto", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-variation-settings:
-    "wdth" 100;
+          "wdth" 100;
 }
 
 .login-input {
   padding: 12px 14px;
   font-size: 1rem;
-  background: #D8DBE2;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  font-family: "Roboto", sans-serif;
+  color: #211F20;
+  background: #fff;
+  border: 1px solid #E0D5D1;
+  border-radius: 6px;
 }
 
 .login-input:focus {
-  outline: none;
-  border-color: #4a90e2;
+  outline: 2px solid #EF6351;
+  outline-offset: 1px;
+  border-color: #EF6351;
 }
 
 .login-error {
@@ -111,18 +122,27 @@
 }
 
 .login-submit-button {
-  margin-top: auto;
+  /* No margin-top: auto and no min-height on the modal, so the button sits
+     directly under the fields instead of being pinned to the bottom of a
+     fixed-height box. */
+  margin-top: 6px;
   padding: 14px;
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
   background: #EF6351;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.login-submit-button:hover:not(:disabled) {
+  background: #D9503F;
 }
 
 .login-submit-button:disabled {
-  opacity: 0.6;
+  background: #DCD4D1;
+  color: #918A87;
   cursor: not-allowed;
 }

@@ -76,9 +76,14 @@ describe("Login", () => {
 			"ADMIN",
 			jwt
 		));
+		// The correlation id is a fresh UUID per request, so we assert that one
+		// was sent rather than pinning a value that changes every run.
 		expect(fetchMock).toHaveBeenCalledWith("/api/auth/login", {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"X-Correlation-Id": expect.any(String),
+			},
 			body: JSON.stringify({ username: "admin1", password: "secret" }),
 		});
 		expect(screen.queryByRole("dialog")).toBeNull();

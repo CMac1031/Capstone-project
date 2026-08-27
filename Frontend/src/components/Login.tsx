@@ -13,6 +13,7 @@ import { useRef, useState, type SubmitEvent, type KeyboardEvent, type MouseEvent
 import { createPortal } from "react-dom";
 import { useAuth } from "../hooks/useAuth";
 import { type Permission } from "../types/AuthTypes";
+import { newCorrelationId } from "../utils/correlation";
 import "../styles/Login.css";
 
 interface LoginApiResponse {
@@ -66,7 +67,10 @@ export default function Login() {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Correlation-Id": newCorrelationId(),
+        },
         body: JSON.stringify({ username, password }),
       });
 
@@ -89,74 +93,74 @@ export default function Login() {
   };
 
   return (
-    <>
-      <div
-        className="login-button-box"
-        onClick={openModal}
-        onKeyDown={handleBoxKeyDown}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-      >
-        <span className="login-button-label">Login</span>
-      </div>
+      <>
+        <div
+            className="login-button-box"
+            onClick={openModal}
+            onKeyDown={handleBoxKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="dialog"
+        >
+          <span className="login-button-label">Login</span>
+        </div>
 
-      {isOpen && typeof document !== "undefined"
-        ? createPortal(
-            <div
-              className="login-overlay"
-              ref={overlayRef}
-              onMouseDown={handleOverlayMouseDown}
-            >
-              <div
-                className="login-modal"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="login-modal-title"
-              >
-                <h2 id="login-modal-title" className="login-modal-title">
-                  Log In
-                </h2>
-
-                <form className="login-form" onSubmit={handleSubmit}>
-                  <label className="login-field">
-                    <span className="login-field-label">Username</span>
-                    <input
-                      type="text"
-                      className="login-input"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      autoFocus
-                      required
-                    />
-                  </label>
-
-                  <label className="login-field">
-                    <span className="login-field-label">Password</span>
-                    <input
-                      type="password"
-                      className="login-input"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </label>
-
-                  {error && <p className="login-error">{error}</p>}
-
-                  <button
-                    type="submit"
-                    className="login-submit-button"
-                    disabled={isSubmitting}
+        {isOpen && typeof document !== "undefined"
+            ? createPortal(
+                <div
+                    className="login-overlay"
+                    ref={overlayRef}
+                    onMouseDown={handleOverlayMouseDown}
+                >
+                  <div
+                      className="login-modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="login-modal-title"
                   >
-                    {isSubmitting ? "Logging in..." : "Log In"}
-                  </button>
-                </form>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-    </>
+                    <h2 id="login-modal-title" className="login-modal-title">
+                      Log In
+                    </h2>
+
+                    <form className="login-form" onSubmit={handleSubmit}>
+                      <label className="login-field">
+                        <span className="login-field-label">Username</span>
+                        <input
+                            type="text"
+                            className="login-input"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            autoFocus
+                            required
+                        />
+                      </label>
+
+                      <label className="login-field">
+                        <span className="login-field-label">Password</span>
+                        <input
+                            type="password"
+                            className="login-input"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                      </label>
+
+                      {error && <p className="login-error">{error}</p>}
+
+                      <button
+                          type="submit"
+                          className="login-submit-button"
+                          disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Logging in..." : "Log In"}
+                      </button>
+                    </form>
+                  </div>
+                </div>,
+                document.body
+            )
+            : null}
+      </>
   );
 }
