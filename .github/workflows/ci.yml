@@ -71,26 +71,49 @@ jobs:
         run: npm run build
 
   image:
-    name: Build backend image
+    name: Publish container images
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     needs:
       - verify
       - frontend
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Build SHA-tagged backend image
-        run: >
-          docker build
-          --file backend/Dockerfile
-          --tag crm-api:${GITHUB_SHA}
-          backend
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Record local image identity
-        run: |
-          echo "Image tag: crm-api:${GITHUB_SHA}"
-          docker image inspect "crm-api:${GITHUB_SHA}" --format='Image ID: {{.Id}}'
+      - name: Build and publish backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/cmac1031/capstone-project-backend:${{ github.sha }}
+            ghcr.io/cmac1031/capstone-project-backend:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Build and publish frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Frontend
+          file: ./Frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/cmac1031/capstone-project-frontend:${{ github.sha }}
+            ghcr.io/cmac1031/capstone-project-frontend:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
