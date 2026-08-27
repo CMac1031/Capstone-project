@@ -22,10 +22,18 @@ afterEach(() => {
 });
 
 // "Log in" appears twice on screen -- once as the tab, once as the submit
-// button -- so tests select the submit button specifically by its class
-// rather than by accessible name, which is ambiguous.
+// button -- so text assertions select the submit button specifically by
+// its class rather than by accessible name, which is ambiguous.
 function submitButton(container: HTMLElement): HTMLButtonElement {
 	return container.querySelector(".login-screen-submit") as HTMLButtonElement;
+}
+
+// Submitting via the form itself (rather than clicking the button)
+// bypasses jsdom's native "required" field validation, matching how the
+// old dialog-based tests worked -- these tests care about what happens
+// once handleSubmit actually runs, not about browser field validation.
+function submitForm(container: HTMLElement) {
+	fireEvent.submit(container.querySelector("form")!);
 }
 
 describe("Login", () => {
@@ -63,7 +71,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "secret" },
 		});
-		fireEvent.click(submitButton(container));
+		submitForm(container);
 
 		await waitFor(() => expect(loginMock).toHaveBeenCalledWith(
 			"admin1",
@@ -87,7 +95,7 @@ describe("Login", () => {
 		fireEvent.change(screen.getByLabelText("Password"), {
 			target: { value: "wrong" },
 		});
-		fireEvent.click(submitButton(container));
+		submitForm(container);
 
 		await waitFor(() => expect(screen.getByText(
 			"Invalid username or password."
@@ -102,7 +110,7 @@ describe("Login", () => {
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue("offline"));
 		const { container } = render(<Login />);
 
-		fireEvent.click(submitButton(container));
+		submitForm(container);
 
 		await waitFor(() => expect(screen.getByText(
 			"Login failed. Please try again."
@@ -119,7 +127,7 @@ describe("Login", () => {
 		vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFetch));
 		const { container } = render(<Login />);
 
-		fireEvent.click(submitButton(container));
+		submitForm(container);
 		expect((screen.getByRole("button", { name: "Logging in..." }) as HTMLButtonElement).disabled).toBe(true);
 
 		resolveFetch({ ok: false, json: async () => ({}) });
