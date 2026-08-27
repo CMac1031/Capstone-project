@@ -1,0 +1,22 @@
+INSERT INTO customer (customer_id, name, email, phone, account_status)
+VALUES
+    ('CUS-1031', 'Hannah Baker', 'hannah.baker@example.com', '800-555-1031', 'ACTIVE'),
+    ('CUS-1032', 'Omar Farouk', 'omar.farouk@example.com', '800-555-1032', 'SUSPENDED'),
+    ('CUS-1033', 'Natalie Evans', 'natalie.evans@example.com', '800-555-1033', 'ACTIVE'),
+    ('CUS-1034', 'Isaac Moore', 'isaac.moore@example.com', '800-555-1034', 'PENDING'),
+    ('CUS-1035', 'Camila Santos', 'camila.santos@example.com', '800-555-1035', 'ACTIVE'),
+    ('CUS-1036', 'Julian Wright', 'julian.wright@example.com', '800-555-1036', 'INACTIVE'),
+    ('CUS-1037', 'Aisha Rahman', 'aisha.rahman@example.com', '800-555-1037', 'ACTIVE'),
+    ('CUS-1038', 'Leo Martin', 'leo.martin@example.com', '800-555-1038', 'SUSPENDED'),
+    ('CUS-1039', 'Sarah Cohen', 'sarah.cohen@example.com', '800-555-1039', 'ACTIVE'),
+    ('CUS-1040', 'Andre Walker', 'andre.walker@example.com', '800-555-1040', 'PENDING'),
+    ('CUS-1041', 'Yuki Tanaka', 'yuki.tanaka@example.com', '800-555-1041', 'ACTIVE'),
+    ('CUS-1042', 'Caleb Hall', 'caleb.hall@example.com', '800-555-1042', 'INACTIVE'),
+    ('CUS-1043', 'Leila Haddad', 'leila.haddad@example.com', '800-555-1043', 'ACTIVE'),
+    ('CUS-1044', 'Adrian King', 'adrian.king@example.com', '800-555-1044', 'SUSPENDED'),
+    ('CUS-1045', 'Valentina Cruz', 'valentina.cruz@example.com', '800-555-1045', 'ACTIVE'),
+    ('CUS-1046', 'Nathan Scott', 'nathan.scott@example.com', '800-555-1046', 'PENDING'),
+    ('CUS-1047', 'Imani Lewis', 'imani.lewis@example.com', '800-555-1047', 'ACTIVE'),
+    ('CUS-1048', 'Victor Alvarez', 'victor.alvarez@example.com', '800-555-1048', 'INACTIVE'),
+    ('CUS-1049', 'Emily Parker', 'emily.parker@example.com', '800-555-1049', 'ACTIVE'),
+    ('CUS-1050', 'Rohan Gupta', 'rohan.gupta@example.com', '800-555-1050', 'ACTIVE');
