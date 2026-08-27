@@ -35,7 +35,7 @@ function Logout(){
 function Logo(){
     return (
         <>
-            <h1 className="Logo">NORTHSTAR CRM</h1>
+            <h1 className="Logo">Pretty Nice Code CRM</h1>
         </>
     )
 }

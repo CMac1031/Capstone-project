@@ -1,47 +1,50 @@
-//import './App.css' //-> Global styles
-//This is our main page. Since this is a single page application, all of the our 
-//widgets will be rendered here. 
-import Navbar from "./components/Navbar"
-import Search from "./components/Search"
-import Profile from "./components/Profile"
+import { useState } from "react";
 import { useAuth } from "./hooks/useAuth";
-import { useState, useEffect } from "react";
-import "./App.css"
+import Login from "./components/Login";
+import Sidebar, { type View } from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
+import Profile from "./components/Profile";
+import AdminSignupRequests from "./components/AdminSignupRequests";
+import "./App.css";
 
 function App() {
-  const { isAuthenticated } = useAuth();
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
- 
-  // Logging out closes the profile and resets the search layout.
-  useEffect(() => {
+    const { isAuthenticated } = useAuth();
+    const [view, setView] = useState<View>("dashboard");
+    const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
     if (!isAuthenticated) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedCustomerId(null);
+        return <Login />;
     }
-  }, [isAuthenticated]);
- 
-  const hasSearched = selectedCustomerId !== null;
-  
 
-  return (
-    <>
-    <div className="app-root">
-      <header className="app-header">
-        <Navbar/>
-      </header>
-      <div className={`app-shell ${hasSearched ? "app-shell--split" : ""}`}>
-        <div className="search-panel">
-          <Search onCustomerSelected={setSelectedCustomerId} />
-        </div>
- 
-        <div className="profile-panel">
-          {hasSearched && <Profile customerId={selectedCustomerId} />}
-        </div>
-      </div>
-    </div>
+    const navigate = (next: View) => {
+        setView(next);
+        if (next !== "profile") {
+            setSelectedCustomerId(null);
+        }
+    };
 
-    </>
-  )
+    const openCustomer = (customerId: string) => {
+        setSelectedCustomerId(customerId);
+        setView("profile");
+    };
+
+    const backToCustomers = () => {
+        setSelectedCustomerId(null);
+        setView("dashboard");
+    };
+
+    return (
+        <div className="app-layout">
+            <Sidebar activeView={view} onNavigate={navigate} />
+            <main className="app-content">
+                {view === "dashboard" && <Dashboard onSelectCustomer={openCustomer} />}
+                {view === "profile" && selectedCustomerId && (
+                    <Profile customerId={selectedCustomerId} onBack={backToCustomers} />
+                )}
+                {view === "signup-requests" && <AdminSignupRequests />}
+            </main>
+        </div>
+    );
 }
 
-export default App
+export default App;

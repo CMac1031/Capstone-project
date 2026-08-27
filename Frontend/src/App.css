@@ -50,3 +50,20 @@
   width: 50%;
   opacity: 1;
 }
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--ns-bg, #f4f5f7);
+}
+
+.app-content-placeholder {
+  padding: 40px;
+  font-family: "Inter", sans-serif;
+  color: #5b6270;
+}

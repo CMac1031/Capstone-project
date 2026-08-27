@@ -1,0 +1,113 @@
+@import "./tokens.css";
+
+.sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--ns-navy);
+    color: var(--ns-text-inverse);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    font-family: var(--ns-font-body);
+}
+
+.sidebar-brand {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    font-family: var(--ns-font-mono);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.sidebar-logo-brace {
+    color: var(--ns-accent);
+}
+
+.sidebar-brand-name {
+    font-family: var(--ns-font-display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ns-text-muted);
+    margin: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 2px;
+}
+
+.sidebar-nav-item {
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--ns-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--ns-font-body);
+}
+
+.sidebar-nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--ns-text-inverse);
+}
+
+.sidebar-nav-item--active {
+    background: rgba(226, 84, 62, 0.15);
+    color: #fff;
+    border-left: 2px solid var(--ns-accent);
+    padding-left: 10px;
+}
+
+.sidebar-footer {
+    padding: 16px 20px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-user {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.sidebar-user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.sidebar-user-role {
+    font-size: 11px;
+    color: var(--ns-text-muted);
+    font-family: var(--ns-font-mono);
+}
+
+.sidebar-logout {
+    width: 100%;
+    background: var(--ns-accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.sidebar-logout:hover {
+    background: var(--ns-accent-hover);
+}
