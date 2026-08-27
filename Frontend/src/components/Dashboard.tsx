@@ -88,6 +88,7 @@ export default function Dashboard({ onSelectCustomer }: DashboardProps) {
     }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadCustomers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user.jwt]);
@@ -115,6 +116,7 @@ export default function Dashboard({ onSelectCustomer }: DashboardProps) {
     // Whenever the visible set changes shape (new search, new filter), jump
     // back to page 1 -- otherwise you can land on a page that no longer exists.
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
     }, [searchTerm, statusFilter]);
 
